@@ -70,6 +70,7 @@ El script crea estas tablas:
 - `desserts`
 - `orders`
 - `order_items`
+- `ventas`
 
 Tambien:
 
@@ -78,8 +79,11 @@ Tambien:
 - Permite leer datos administrativos solo desde endpoints seguros con `SUPABASE_SERVICE_ROLE_KEY`.
 - Deja `delivery_date` como campo opcional porque el formulario ya no pide fecha de entrega.
 - Inserta los productos iniciales sin escribir IDs manuales.
+- Crea la tabla `ventas` para consultar rapidamente quien compro, que sabor pidio, cuantas unidades y cual es la direccion de entrega.
 - Agrega Leche Klim.
 - Actualiza los productos activos a `$10.000 COP`.
+
+Si tus tablas ya existen y solo quieres agregar `ventas`, puedes ejecutar de nuevo el archivo `supabase/schema.sql` completo sin borrar las tablas. El script usa `create table if not exists` y tambien copia a `ventas` los pedidos que ya existan.
 
 ## Variables de entorno
 

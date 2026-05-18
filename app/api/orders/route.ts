@@ -195,12 +195,38 @@ export async function POST(request: Request) {
       throw orderError;
     }
 
-    const { error: itemsError } = await supabase
+    const { data: insertedItems, error: itemsError } = await supabase
       .from("order_items")
-      .insert(orderItems.map((item) => ({ ...item, order_id: order.id })));
+      .insert(orderItems.map((item) => ({ ...item, order_id: order.id })))
+      .select("id, dessert_id, dessert_name, quantity, unit_price, subtotal");
 
     if (itemsError) {
       throw itemsError;
+    }
+
+    const { error: salesError } = await supabase
+      .from("ventas")
+      .insert(
+        (insertedItems || []).map((item) => ({
+          order_id: order.id,
+          order_item_id: item.id,
+          customer_id: customer.id,
+          dessert_id: item.dessert_id,
+          customer_name: fullName,
+          customer_email: email,
+          customer_phone: phone,
+          dessert_name: item.dessert_name,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          subtotal: item.subtotal,
+          delivery_address: deliveryAddress,
+          observations: observations || null,
+          status: "recibido"
+        }))
+      );
+
+    if (salesError) {
+      throw salesError;
     }
 
     return NextResponse.json({
