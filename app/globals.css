@@ -1,0 +1,251 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #fff8ec;
+  color: #321808;
+  animation: page-enter 520ms ease-out both;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a,
+button,
+input,
+textarea,
+select {
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    color 220ms ease,
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
+a:hover,
+button:not(:disabled):hover {
+  transform: translateY(-2px);
+}
+
+a:active,
+button:not(:disabled):active {
+  transform: translateY(0) scale(0.98);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  transform: translateY(-1px);
+}
+
+::selection {
+  background: #f5b72f;
+  color: #321808;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 420ms ease-out both;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal-section {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes card-pop {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    box-shadow: 0 18px 55px rgba(50, 24, 8, 0.12);
+  }
+
+  50% {
+    box-shadow: 0 22px 70px rgba(195, 107, 32, 0.22);
+  }
+}
+
+@keyframes shine {
+  from {
+    transform: translateX(-140%) skewX(-18deg);
+  }
+
+  to {
+    transform: translateX(170%) skewX(-18deg);
+  }
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+main > section,
+main > div > section {
+  animation: reveal-section 680ms ease-out both;
+}
+
+main > section:nth-of-type(2),
+main > div > section:nth-of-type(2) {
+  animation-delay: 70ms;
+}
+
+main > section:nth-of-type(3),
+main > div > section:nth-of-type(3) {
+  animation-delay: 120ms;
+}
+
+main > section:nth-of-type(4),
+main > div > section:nth-of-type(4) {
+  animation-delay: 170ms;
+}
+
+.motion-card {
+  animation: card-pop 520ms ease-out both;
+  will-change: transform;
+}
+
+.motion-card:hover {
+  transform: translateY(-6px) scale(1.01);
+}
+
+.motion-panel {
+  animation: reveal-section 560ms ease-out both;
+}
+
+.motion-button {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.motion-button::after {
+  content: "";
+  position: absolute;
+  inset: -40% auto -40% -70%;
+  z-index: -1;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.38), transparent);
+  opacity: 0;
+}
+
+.motion-button:hover::after {
+  animation: shine 760ms ease;
+  opacity: 1;
+}
+
+.motion-input:focus {
+  box-shadow: 0 0 0 4px rgba(195, 107, 32, 0.18);
+}
+
+.motion-float {
+  animation: float-soft 3.2s ease-in-out infinite;
+}
+
+.motion-pulse {
+  animation: pulse-soft 2.8s ease-in-out infinite;
+}
+
+.motion-chart-bar {
+  animation: bar-grow 780ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
+  transform-origin: bottom;
+}
+
+.motion-row {
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.motion-row:hover {
+  background: rgba(255, 248, 236, 0.72);
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}
