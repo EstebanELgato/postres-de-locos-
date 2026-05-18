@@ -23,7 +23,7 @@ export default function OrderSuccessModal({ isOpen, onClose }: OrderSuccessModal
     <AnimatePresence>
       {isOpen ? (
         <motion.div
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-cocoa/60 px-4 py-8 backdrop-blur-sm"
+          className="fixed inset-0 z-[999] flex items-start justify-center overflow-y-auto overscroll-contain bg-cocoa/60 px-4 pb-10 pt-6 backdrop-blur-sm sm:items-center sm:py-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

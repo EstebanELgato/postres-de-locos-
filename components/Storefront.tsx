@@ -145,6 +145,19 @@ export default function Storefront() {
     return "";
   }
 
+  function showSuccessModalInView() {
+    const activeElement = document.activeElement;
+
+    if (activeElement instanceof HTMLElement) {
+      activeElement.blur();
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.setTimeout(() => {
+      setIsSuccessModalOpen(true);
+    }, 240);
+  }
+
   async function submitOrder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSuccessModalOpen(false);
@@ -195,10 +208,7 @@ export default function Storefront() {
       setCart({});
       setSelectedQuantities(getInitialQuantities());
       setFormFeedback(null);
-      setIsSuccessModalOpen(true);
-      window.requestAnimationFrame(() => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      });
+      showSuccessModalInView();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Ocurrio un error al enviar el pedido.";
       setFormFeedback({ type: "error", text: message });
