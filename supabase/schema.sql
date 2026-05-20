@@ -1,5 +1,6 @@
 create table if not exists public.customers (
   id bigint generated always as identity primary key,
+  document_number text not null unique,
   full_name text not null,
   email text not null,
   phone text not null,
@@ -43,6 +44,7 @@ create table if not exists public.ventas (
   order_id bigint not null references public.orders(id) on delete cascade,
   order_item_id bigint not null unique references public.order_items(id) on delete cascade,
   customer_id bigint not null references public.customers(id) on delete restrict,
+  customer_document text not null,
   dessert_id bigint not null references public.desserts(id) on delete restrict,
   customer_name text not null,
   customer_email text not null,
@@ -57,6 +59,21 @@ create table if not exists public.ventas (
   created_at timestamptz not null default now()
 );
 
+alter table public.customers add column if not exists document_number text;
+update public.customers
+set document_number = 'sin-cedula-' || id
+where document_number is null or btrim(document_number) = '';
+alter table public.customers alter column document_number set not null;
+create unique index if not exists customers_document_number_key on public.customers(document_number);
+
+alter table public.ventas add column if not exists customer_document text;
+update public.ventas
+set customer_document = customers.document_number
+from public.customers
+where public.ventas.customer_id = customers.id
+  and (public.ventas.customer_document is null or btrim(public.ventas.customer_document) = '');
+alter table public.ventas alter column customer_document set not null;
+
 alter table public.orders alter column delivery_date drop not null;
 
 create index if not exists orders_customer_id_idx on public.orders(customer_id);
@@ -66,6 +83,7 @@ create index if not exists order_items_order_id_idx on public.order_items(order_
 create index if not exists order_items_dessert_id_idx on public.order_items(dessert_id);
 create index if not exists ventas_order_id_idx on public.ventas(order_id);
 create index if not exists ventas_customer_id_idx on public.ventas(customer_id);
+create index if not exists ventas_customer_document_idx on public.ventas(customer_document);
 create index if not exists ventas_dessert_id_idx on public.ventas(dessert_id);
 create index if not exists ventas_created_at_idx on public.ventas(created_at desc);
 create index if not exists ventas_status_idx on public.ventas(status);
@@ -162,6 +180,7 @@ insert into public.ventas (
   order_id,
   order_item_id,
   customer_id,
+  customer_document,
   dessert_id,
   customer_name,
   customer_email,
@@ -179,6 +198,7 @@ select
   orders.id,
   order_items.id,
   customers.id,
+  customers.document_number,
   order_items.dessert_id,
   customers.full_name,
   customers.email,
@@ -196,6 +216,7 @@ join public.orders on orders.id = order_items.order_id
 join public.customers on customers.id = orders.customer_id
 on conflict (order_item_id) do update set
   customer_name = excluded.customer_name,
+  customer_document = excluded.customer_document,
   customer_email = excluded.customer_email,
   customer_phone = excluded.customer_phone,
   dessert_name = excluded.dessert_name,
@@ -205,3 +226,43 @@ on conflict (order_item_id) do update set
   delivery_address = excluded.delivery_address,
   observations = excluded.observations,
   status = excluded.status;
+
+create or replace view public.ventas_resumen as
+select
+  orders.id as order_id,
+  customers.id as customer_id,
+  customers.document_number as cedula,
+  customers.full_name as cliente,
+  customers.phone as telefono,
+  customers.email as correo,
+  string_agg(
+    order_items.dessert_name || ': ' || order_items.quantity ||
+      case
+        when order_items.quantity = 1 then ' unidad'
+        else ' unidades'
+      end,
+    ', '
+    order by order_items.dessert_name
+  ) as postres,
+  sum(order_items.quantity) as total_unidades,
+  orders.total_amount as total_pedido,
+  orders.delivery_address as direccion_entrega,
+  orders.observations as observaciones,
+  orders.status as estado,
+  orders.created_at as fecha_pedido
+from public.orders
+join public.customers on customers.id = orders.customer_id
+join public.order_items on order_items.order_id = orders.id
+group by
+  orders.id,
+  customers.id,
+  customers.document_number,
+  customers.full_name,
+  customers.phone,
+  customers.email,
+  orders.total_amount,
+  orders.delivery_address,
+  orders.observations,
+  orders.status,
+  orders.created_at
+order by orders.created_at desc;

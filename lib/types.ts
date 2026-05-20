@@ -9,6 +9,7 @@ export type Dessert = {
 
 export type OrderForm = {
   fullName: string;
+  documentNumber: string;
   phone: string;
   email: string;
   deliveryAddress: string;
@@ -42,6 +43,7 @@ export type AdminOrder = {
   created_at: string;
   customers: {
     id: number;
+    document_number: string;
     full_name: string;
     email: string;
     phone: string;

@@ -6,6 +6,7 @@ export const runtime = "nodejs";
 type OrderRequest = {
   customer?: {
     fullName?: string;
+    documentNumber?: string;
     email?: string;
     phone?: string;
   };
@@ -22,6 +23,7 @@ type OrderRequest = {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^\+?[0-9\s()\-]{7,20}$/;
+const documentPattern = /^[0-9]{5,12}$/;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 20;
 const requestLog = new Map<string, number[]>();
@@ -86,15 +88,23 @@ export async function POST(request: Request) {
     }
 
     const fullName = cleanText(body.customer?.fullName);
+    const documentNumber = cleanText(body.customer?.documentNumber).replace(/\D/g, "");
     const email = cleanText(body.customer?.email).toLowerCase();
     const phone = cleanText(body.customer?.phone);
     const deliveryAddress = cleanText(body.order?.deliveryAddress);
     const observations = cleanText(body.order?.observations);
     const items = Array.isArray(body.items) ? body.items : [];
 
-    if (!fullName || !email || !phone || !deliveryAddress) {
+    if (!fullName || !documentNumber || !email || !phone || !deliveryAddress) {
       return NextResponse.json(
-        { message: "Completa nombre, correo, telefono y direccion." },
+        { message: "Completa nombre, cedula, correo, telefono y direccion." },
+        { status: 400 }
+      );
+    }
+
+    if (!documentPattern.test(documentNumber)) {
+      return NextResponse.json(
+        { message: "Escribe una cedula de ciudadania valida." },
         { status: 400 }
       );
     }
@@ -166,11 +176,15 @@ export async function POST(request: Request) {
 
     const { data: customer, error: customerError } = await supabase
       .from("customers")
-      .insert({
-        full_name: fullName,
-        email,
-        phone
-      })
+      .upsert(
+        {
+          document_number: documentNumber,
+          full_name: fullName,
+          email,
+          phone
+        },
+        { onConflict: "document_number" }
+      )
       .select("id")
       .single();
 
@@ -204,26 +218,27 @@ export async function POST(request: Request) {
       throw itemsError;
     }
 
+    const salesRows = (insertedItems || []).map((item) => ({
+      order_id: order.id,
+      order_item_id: item.id,
+      customer_id: customer.id,
+      customer_document: documentNumber,
+      dessert_id: item.dessert_id,
+      customer_name: fullName,
+      customer_email: email,
+      customer_phone: phone,
+      dessert_name: item.dessert_name,
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      subtotal: item.subtotal,
+      delivery_address: deliveryAddress,
+      observations: observations || null,
+      status: "recibido"
+    }));
+
     const { error: salesError } = await supabase
       .from("ventas")
-      .insert(
-        (insertedItems || []).map((item) => ({
-          order_id: order.id,
-          order_item_id: item.id,
-          customer_id: customer.id,
-          dessert_id: item.dessert_id,
-          customer_name: fullName,
-          customer_email: email,
-          customer_phone: phone,
-          dessert_name: item.dessert_name,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          subtotal: item.subtotal,
-          delivery_address: deliveryAddress,
-          observations: observations || null,
-          status: "recibido"
-        }))
-      );
+      .insert(salesRows);
 
     if (salesError) {
       throw salesError;

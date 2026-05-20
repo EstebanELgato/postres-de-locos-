@@ -10,7 +10,7 @@ Aplicacion web profesional para vender postres caseros. Esta creada con Next.js,
 - Seccion "Descripcion de productos".
 - Boton superior "Haz tu pedido" que lleva al formulario.
 - Boton flotante de WhatsApp conectado a `https://wa.me/573114591424`.
-- Formulario de pedido sin fecha de entrega, con nombre, telefono, correo, direccion y observaciones.
+- Formulario de pedido sin fecha de entrega, con nombre, cedula de ciudadania, telefono, correo, direccion y observaciones.
 - Validaciones de campos obligatorios, correo, telefono, cantidades y pedidos vacios.
 - Toast notifications, loaders, transiciones y feedback visual al enviar.
 - Proteccion basica anti spam con honeypot y rate limiting en el endpoint de pedidos.
@@ -71,6 +71,7 @@ El script crea estas tablas:
 - `orders`
 - `order_items`
 - `ventas`
+- `ventas_resumen`
 
 Tambien:
 
@@ -80,10 +81,17 @@ Tambien:
 - Deja `delivery_date` como campo opcional porque el formulario ya no pide fecha de entrega.
 - Inserta los productos iniciales sin escribir IDs manuales.
 - Crea la tabla `ventas` para consultar rapidamente quien compro, que sabor pidio, cuantas unidades y cual es la direccion de entrega.
+- Crea la vista `ventas_resumen` para ver una sola fila por pedido, por ejemplo: `Esteban | Oreo: 2 unidades, Maracuya: 1 unidad | direccion`.
+- Usa la cedula de ciudadania como identificador unico del cliente en `customers.document_number`.
+- Guarda la cedula y el nombre del cliente en `ventas` para que puedas reconocer facilmente quien compro.
 - Agrega Leche Klim.
 - Actualiza los productos activos a `$10.000 COP`.
 
-Si tus tablas ya existen y solo quieres agregar `ventas`, puedes ejecutar de nuevo el archivo `supabase/schema.sql` completo sin borrar las tablas. El script usa `create table if not exists` y tambien copia a `ventas` los pedidos que ya existan.
+Si tus tablas ya existen y solo quieres agregar `ventas` y la cedula de ciudadania, puedes ejecutar de nuevo el archivo `supabase/schema.sql` completo sin borrar las tablas. El script usa `create table if not exists`, agrega las columnas faltantes y tambien copia a `ventas` los pedidos que ya existan.
+
+Nota: en `ventas` aparece una fila por cada sabor comprado. Si una persona pide tres sabores en el mismo pedido, veras tres filas con el mismo `order_id`, el mismo `customer_id`, la misma cedula y el mismo nombre. Eso significa que sigue siendo una sola orden, pero con varios productos.
+
+Para ver los pedidos de forma mas facil, abre la vista `ventas_resumen` en Supabase. Ahi cada pedido aparece en una sola fila con la columna `postres`, por ejemplo: `Oreo: 2 unidades, Maracuya: 1 unidad`.
 
 ## Variables de entorno
 

@@ -22,6 +22,7 @@ type QuantityMap = Record<number, number>;
 
 const initialForm: OrderForm = {
   fullName: "",
+  documentNumber: "",
   phone: "",
   email: "",
   deliveryAddress: "",
@@ -31,6 +32,7 @@ const initialForm: OrderForm = {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^\+?[0-9\s()\-]{7,20}$/;
+const documentPattern = /^[0-9]{5,12}$/;
 
 function getInitialQuantities(): QuantityMap {
   return Object.fromEntries(DESSERTS.map((dessert) => [dessert.id, 1])) as QuantityMap;
@@ -129,8 +131,19 @@ export default function Storefront() {
       return "Todas las cantidades deben ser mayores a cero.";
     }
 
-    if (!form.fullName.trim() || !form.phone.trim() || !form.email.trim() || !form.deliveryAddress.trim()) {
-      return "Completa nombre, telefono, correo y direccion.";
+    if (
+      !form.fullName.trim() ||
+      !form.documentNumber.trim() ||
+      !form.phone.trim() ||
+      !form.email.trim() ||
+      !form.deliveryAddress.trim()
+    ) {
+      return "Completa nombre, cedula, telefono, correo y direccion.";
+    }
+
+    const documentDigits = form.documentNumber.replace(/\D/g, "");
+    if (!documentPattern.test(documentDigits)) {
+      return "Escribe una cedula de ciudadania valida.";
     }
 
     if (!emailPattern.test(form.email.trim())) {
@@ -183,6 +196,7 @@ export default function Storefront() {
         body: JSON.stringify({
           customer: {
             fullName: form.fullName,
+            documentNumber: form.documentNumber,
             email: form.email,
             phone: form.phone
           },
@@ -465,6 +479,17 @@ export default function Storefront() {
                   onChange={(event) => updateForm("fullName", event.target.value)}
                   className="motion-input h-12 w-full rounded-md border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
                   placeholder="Tu nombre"
+                />
+              </label>
+              <label className="space-y-2">
+                <span className="text-sm font-black">Cedula de ciudadania</span>
+                <input
+                  required
+                  inputMode="numeric"
+                  value={form.documentNumber}
+                  onChange={(event) => updateForm("documentNumber", event.target.value)}
+                  className="motion-input h-12 w-full rounded-md border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
+                  placeholder="Tu numero de cedula"
                 />
               </label>
               <label className="space-y-2">
