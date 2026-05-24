@@ -9,6 +9,23 @@ type SupabaseOrder = Omit<AdminOrder, "customers"> & {
   customers: AdminOrder["customers"] | AdminOrder["customers"][];
 };
 
+const allowedStatuses = new Set(["recibido", "pagado"]);
+const allowedPaymentMethods = new Set(["efectivo", "transferencia"]);
+
+function cleanText(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function parseOrderId(value: unknown) {
+  const numericValue = typeof value === "number"
+    ? value
+    : typeof value === "string"
+      ? Number(value.trim())
+      : NaN;
+
+  return Number.isInteger(numericValue) && numericValue > 0 ? numericValue : null;
+}
+
 export async function GET(request: NextRequest) {
   const token = request.cookies.get(getAdminCookieName())?.value;
 
@@ -29,10 +46,12 @@ export async function GET(request: NextRequest) {
         observations,
         total_amount,
         status,
+        payment_method,
+        admin_notes,
         created_at,
         customers (
           id,
-          cedula,
+          document_number,
           full_name,
           email,
           phone
@@ -94,6 +113,87 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       { message: "No se pudieron leer los pedidos desde Supabase." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  const token = request.cookies.get(getAdminCookieName())?.value;
+
+  if (!verifyAdminSessionToken(token)) {
+    return NextResponse.json({ message: "No autorizado." }, { status: 401 });
+  }
+
+  try {
+    const body = (await request.json()) as {
+      orderId?: number | string;
+      status?: string;
+      paymentMethod?: string | null;
+      adminNotes?: string | null;
+    };
+    const orderId = parseOrderId(body.orderId);
+    const status = cleanText(body.status).toLowerCase();
+    const requestedPaymentMethod = cleanText(body.paymentMethod).toLowerCase();
+    const adminNotes = cleanText(body.adminNotes) || null;
+
+    if (!orderId) {
+      return NextResponse.json({ message: "ID de pedido invalido." }, { status: 400 });
+    }
+
+    if (!allowedStatuses.has(status)) {
+      return NextResponse.json({ message: "Estado invalido." }, { status: 400 });
+    }
+
+    if (status === "pagado" && !allowedPaymentMethods.has(requestedPaymentMethod)) {
+      return NextResponse.json(
+        { message: "Selecciona si el pago fue en efectivo o transferencia." },
+        { status: 400 }
+      );
+    }
+
+    const paymentMethod = status === "pagado" ? requestedPaymentMethod : null;
+
+    const supabase = getSupabaseAdmin();
+    const { data: order, error: orderError } = await supabase
+      .from("orders")
+      .update({
+        status,
+        payment_method: paymentMethod,
+        admin_notes: adminNotes
+      })
+      .eq("id", orderId)
+      .select("id, status, payment_method, admin_notes")
+      .single();
+
+    if (orderError) {
+      throw orderError;
+    }
+
+    const { error: salesError } = await supabase
+      .from("ventas")
+      .update({
+        status,
+        payment_method: paymentMethod,
+        admin_notes: adminNotes
+      })
+      .eq("order_id", orderId);
+
+    if (salesError) {
+      throw salesError;
+    }
+
+    return NextResponse.json({ order });
+  } catch (error) {
+    console.error("Admin order update error", error);
+    const message = error instanceof Error ? error.message : "";
+
+    if (message.includes("Supabase no esta configurado")) {
+      return NextResponse.json({ message }, { status: 500 });
+    }
+
+    return NextResponse.json(
+      { message: "No se pudo actualizar el pedido." },
       { status: 500 }
     );
   }

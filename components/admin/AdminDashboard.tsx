@@ -20,6 +20,9 @@ const initialLogin: LoginState = {
   password: ""
 };
 
+const orderStatusOptions = ["recibido", "pagado"];
+const paymentMethodOptions = ["efectivo", "transferencia"];
+
 function Spinner({ dark = false }: { dark?: boolean }) {
   return (
     <span
@@ -110,6 +113,7 @@ export default function AdminDashboard() {
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
+  const [savingOrderId, setSavingOrderId] = useState<number | null>(null);
 
   const loadOrders = useCallback(async () => {
     setIsLoading(true);
@@ -146,7 +150,7 @@ export default function AdminDashboard() {
   }, [loadOrders]);
 
   const statuses = useMemo(
-    () => Array.from(new Set(orders.map((order) => order.status))).sort(),
+    () => Array.from(new Set([...orderStatusOptions, ...orders.map((order) => order.status)])).sort(),
     [orders]
   );
 
@@ -161,9 +165,11 @@ export default function AdminDashboard() {
         [
           order.id,
           order.customer_id,
-          order.customers?.cedula,
+          order.customers?.document_number,
           order.delivery_address,
           order.status,
+          order.payment_method,
+          order.admin_notes,
           order.customers?.full_name,
           order.customers?.email,
           order.customers?.phone,
@@ -254,6 +260,60 @@ export default function AdminDashboard() {
     setSummary([]);
   }
 
+  function updateOrderLocally(orderId: number, changes: Partial<AdminOrder>) {
+    setOrders((current) =>
+      current.map((order) =>
+        order.id === orderId ? { ...order, ...changes } : order
+      )
+    );
+  }
+
+  async function saveOrderChanges(
+    orderId: number,
+    changes: {
+      status: string;
+      paymentMethod?: string | null;
+      adminNotes?: string | null;
+    }
+  ) {
+    setSavingOrderId(orderId);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/admin/orders", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          orderId,
+          ...changes
+        })
+      });
+      const data = (await response.json()) as {
+        message?: string;
+        order?: Pick<AdminOrder, "id" | "status" | "payment_method" | "admin_notes">;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.message || "No se pudo guardar el pedido.");
+      }
+
+      if (data.order) {
+        updateOrderLocally(orderId, {
+          status: data.order.status,
+          payment_method: data.order.payment_method,
+          admin_notes: data.order.admin_notes
+        });
+      }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Error guardando cambios del pedido.");
+      await loadOrders();
+    } finally {
+      setSavingOrderId(null);
+    }
+  }
+
   function exportOrders() {
     const rows = filteredOrders.flatMap((order) =>
       order.order_items.map((item) => ({
@@ -263,11 +323,13 @@ export default function AdminDashboard() {
         postre_id: item.dessert_id,
         fecha_pedido: formatDate(order.created_at),
         cliente: order.customers?.full_name || "",
-        cedula: order.customers?.cedula || "",
+        cedula: order.customers?.document_number || "",
         correo: order.customers?.email || "",
         telefono: order.customers?.phone || "",
         direccion_entrega: order.delivery_address,
         estado: order.status,
+        metodo_pago: order.payment_method || "",
+        notas_admin: order.admin_notes || "",
         postre: item.dessert_name,
         cantidad: item.quantity,
         precio_unitario: Number(item.unit_price),
@@ -574,7 +636,7 @@ export default function AdminDashboard() {
             </button>
           </div>
           <div className="mt-5 overflow-x-auto">
-            <table className="w-full min-w-[980px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[1260px] border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-caramel/20 text-cocoa/65">
                   <th className="py-3 pr-4">Fecha</th>
@@ -585,12 +647,14 @@ export default function AdminDashboard() {
                   <th className="py-3 pr-4">Productos</th>
                   <th className="py-3 pr-4">Total</th>
                   <th className="py-3 pr-4">Estado</th>
+                  <th className="py-3 pr-4">Pago</th>
+                  <th className="py-3 pr-4">Notas</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-6 text-cocoa/60">No hay pedidos para mostrar.</td>
+                    <td colSpan={10} className="py-6 text-cocoa/60">No hay pedidos para mostrar.</td>
                   </tr>
                 ) : (
                   filteredOrders.map((order) => (
@@ -599,7 +663,7 @@ export default function AdminDashboard() {
                       <td className="py-4 pr-4 font-black">#{order.id}</td>
                       <td className="py-4 pr-4">
                         <p className="font-black">{order.customers?.full_name}</p>
-                        <p className="text-cocoa/60">CC {order.customers?.cedula}</p>
+                        <p className="text-cocoa/60">CC {order.customers?.document_number}</p>
                         <p className="text-cocoa/60">{order.customers?.email}</p>
                       </td>
                       <td className="py-4 pr-4">{order.customers?.phone}</td>
@@ -613,9 +677,77 @@ export default function AdminDashboard() {
                       </td>
                       <td className="py-4 pr-4 font-black text-berry">{formatCurrency(Number(order.total_amount))}</td>
                       <td className="py-4 pr-4">
-                        <span className="rounded-full bg-honey/25 px-3 py-1 text-xs font-black uppercase text-cocoa">
-                          {order.status}
-                        </span>
+                        <select
+                          value={order.status}
+                          disabled={savingOrderId === order.id}
+                          onChange={(event) => {
+                            const nextStatus = event.target.value;
+                            const nextPaymentMethod = nextStatus === "pagado"
+                              ? order.payment_method || "efectivo"
+                              : null;
+
+                            updateOrderLocally(order.id, {
+                              status: nextStatus,
+                              payment_method: nextPaymentMethod
+                            });
+                            void saveOrderChanges(order.id, {
+                              status: nextStatus,
+                              paymentMethod: nextPaymentMethod,
+                              adminNotes: order.admin_notes
+                            });
+                          }}
+                          className="motion-input h-10 w-32 rounded-md border border-caramel/20 bg-cream px-3 text-sm font-black outline-none ring-caramel/20 transition focus:ring-4 disabled:opacity-60"
+                        >
+                          {orderStatusOptions.map((status) => (
+                            <option key={status} value={status}>{status}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="py-4 pr-4">
+                        {order.status === "pagado" ? (
+                          <select
+                            value={order.payment_method || "efectivo"}
+                            disabled={savingOrderId === order.id}
+                            onChange={(event) => {
+                              const nextPaymentMethod = event.target.value;
+
+                              updateOrderLocally(order.id, {
+                                payment_method: nextPaymentMethod
+                              });
+                              void saveOrderChanges(order.id, {
+                                status: "pagado",
+                                paymentMethod: nextPaymentMethod,
+                                adminNotes: order.admin_notes
+                              });
+                            }}
+                            className="motion-input h-10 w-36 rounded-md border border-caramel/20 bg-cream px-3 text-sm font-black outline-none ring-caramel/20 transition focus:ring-4 disabled:opacity-60"
+                          >
+                            {paymentMethodOptions.map((method) => (
+                              <option key={method} value={method}>{method}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className="text-xs font-bold text-cocoa/50">Pendiente</span>
+                        )}
+                      </td>
+                      <td className="py-4 pr-4">
+                        <textarea
+                          value={order.admin_notes || ""}
+                          disabled={savingOrderId === order.id}
+                          onChange={(event) => updateOrderLocally(order.id, { admin_notes: event.target.value })}
+                          onBlur={(event) => {
+                            void saveOrderChanges(order.id, {
+                              status: order.status,
+                              paymentMethod: order.payment_method,
+                              adminNotes: event.currentTarget.value
+                            });
+                          }}
+                          className="motion-input min-h-20 w-56 resize-y rounded-md border border-caramel/20 bg-cream px-3 py-2 text-sm outline-none ring-caramel/20 transition focus:ring-4 disabled:opacity-60"
+                          placeholder="Notas internas"
+                        />
+                        {savingOrderId === order.id ? (
+                          <p className="mt-1 text-xs font-bold text-caramel">Guardando...</p>
+                        ) : null}
                       </td>
                     </tr>
                   ))

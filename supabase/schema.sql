@@ -25,6 +25,8 @@ create table if not exists public.orders (
   observations text,
   total_amount numeric(12, 2) not null default 0 check (total_amount >= 0),
   status text not null default 'recibido',
+  payment_method text,
+  admin_notes text,
   created_at timestamptz not null default now()
 );
 
@@ -56,6 +58,8 @@ create table if not exists public.ventas (
   delivery_address text not null,
   observations text,
   status text not null default 'recibido',
+  payment_method text,
+  admin_notes text,
   created_at timestamptz not null default now()
 );
 
@@ -74,11 +78,17 @@ where public.ventas.customer_id = customers.id
   and (public.ventas.customer_document is null or btrim(public.ventas.customer_document) = '');
 alter table public.ventas alter column customer_document set not null;
 
+alter table public.orders add column if not exists payment_method text;
+alter table public.orders add column if not exists admin_notes text;
+alter table public.ventas add column if not exists payment_method text;
+alter table public.ventas add column if not exists admin_notes text;
+
 alter table public.orders alter column delivery_date drop not null;
 
 create index if not exists orders_customer_id_idx on public.orders(customer_id);
 create index if not exists orders_created_at_idx on public.orders(created_at desc);
 create index if not exists orders_status_idx on public.orders(status);
+create index if not exists orders_payment_method_idx on public.orders(payment_method);
 create index if not exists order_items_order_id_idx on public.order_items(order_id);
 create index if not exists order_items_dessert_id_idx on public.order_items(dessert_id);
 create index if not exists ventas_order_id_idx on public.ventas(order_id);
@@ -87,6 +97,7 @@ create index if not exists ventas_customer_document_idx on public.ventas(custome
 create index if not exists ventas_dessert_id_idx on public.ventas(dessert_id);
 create index if not exists ventas_created_at_idx on public.ventas(created_at desc);
 create index if not exists ventas_status_idx on public.ventas(status);
+create index if not exists ventas_payment_method_idx on public.ventas(payment_method);
 
 alter table public.customers enable row level security;
 alter table public.desserts enable row level security;
@@ -192,6 +203,8 @@ insert into public.ventas (
   delivery_address,
   observations,
   status,
+  payment_method,
+  admin_notes,
   created_at
 )
 select
@@ -210,6 +223,8 @@ select
   orders.delivery_address,
   orders.observations,
   orders.status,
+  orders.payment_method,
+  orders.admin_notes,
   orders.created_at
 from public.order_items
 join public.orders on orders.id = order_items.order_id
@@ -225,9 +240,13 @@ on conflict (order_item_id) do update set
   subtotal = excluded.subtotal,
   delivery_address = excluded.delivery_address,
   observations = excluded.observations,
-  status = excluded.status;
+  status = excluded.status,
+  payment_method = excluded.payment_method,
+  admin_notes = excluded.admin_notes;
 
-create or replace view public.ventas_resumen as
+drop view if exists public.ventas_resumen;
+
+create view public.ventas_resumen as
 select
   orders.id as order_id,
   customers.id as customer_id,
@@ -246,8 +265,10 @@ select
   ) as postres,
   sum(order_items.quantity) as total_unidades,
   orders.total_amount as total_pedido,
+  orders.payment_method as metodo_pago,
   orders.delivery_address as direccion_entrega,
   orders.observations as observaciones,
+  orders.admin_notes as notas_admin,
   orders.status as estado,
   orders.created_at as fecha_pedido
 from public.orders
@@ -261,8 +282,10 @@ group by
   customers.phone,
   customers.email,
   orders.total_amount,
+  orders.payment_method,
   orders.delivery_address,
   orders.observations,
+  orders.admin_notes,
   orders.status,
   orders.created_at
 order by orders.created_at desc;

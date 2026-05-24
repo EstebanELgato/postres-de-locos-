@@ -18,6 +18,9 @@ Aplicacion web profesional para vender postres caseros. Esta creada con Next.js,
 - Guardado persistente de pedidos en Supabase.
 - Panel `/admin` protegido con usuario y contrasena por variables de entorno.
 - Dashboard admin con buscador, filtro por fecha, filtro por estado, total vendido hoy, pedidos del dia, ventas totales, producto mas vendido y graficas visuales.
+- En el panel admin puedes cambiar el estado del pedido a `recibido` o `pagado`.
+- Si el pedido esta pagado, puedes registrar si fue por `efectivo` o `transferencia`.
+- Cada pedido tiene un campo de notas internas para seguimiento administrativo.
 - Exportacion de pedidos y resumen de ventas a Excel `.xlsx`.
 - IDs numericos consecutivos en Supabase usando `bigint generated always as identity primary key`.
 
@@ -84,6 +87,7 @@ Tambien:
 - Crea la vista `ventas_resumen` para ver una sola fila por pedido, por ejemplo: `Esteban | Oreo: 2 unidades, Maracuya: 1 unidad | direccion`.
 - Usa la cedula de ciudadania como identificador unico del cliente en `customers.document_number`.
 - Guarda la cedula y el nombre del cliente en `ventas` para que puedas reconocer facilmente quien compro.
+- Agrega `payment_method` y `admin_notes` en `orders` y `ventas` para controlar pagos y notas desde el panel admin.
 - Agrega Leche Klim.
 - Actualiza los productos activos a `$10.000 COP`.
 
