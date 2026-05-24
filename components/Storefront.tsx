@@ -40,7 +40,7 @@ function getInitialQuantities(): QuantityMap {
 
 function WhatsAppIcon() {
   return (
-    <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 32 32" fill="currentColor">
+    <svg aria-hidden="true" className="h-8 w-8 sm:h-9 sm:w-9" viewBox="0 0 32 32" fill="currentColor">
       <path d="M16.04 3C9.38 3 4 8.31 4 14.88c0 2.09.56 4.13 1.62 5.92L4 29l8.39-1.56a12.2 12.2 0 0 0 3.65.55C22.69 27.99 28 22.68 28 16.11 28 9.55 22.69 3 16.04 3Zm0 22.8c-1.16 0-2.3-.18-3.39-.55l-.49-.16-4.98.93.95-4.81-.27-.5a9.75 9.75 0 0 1-1.48-5.16c0-5.34 4.34-9.68 9.67-9.68 5.34 0 9.68 4.34 9.68 9.68 0 5.32-4.34 9.65-9.69 9.65Zm5.31-7.22c-.29-.14-1.72-.84-1.98-.94-.27-.09-.46-.14-.66.15-.19.28-.75.93-.92 1.12-.17.19-.34.21-.63.07-.29-.14-1.22-.45-2.32-1.43-.86-.76-1.43-1.7-1.6-1.99-.17-.28-.02-.44.13-.58.13-.13.29-.34.43-.51.15-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.07-.14-.66-1.58-.9-2.16-.24-.57-.48-.49-.66-.5h-.56c-.19 0-.51.07-.77.36-.27.29-1.02 1-1.02 2.43 0 1.44 1.05 2.83 1.19 3.02.15.19 2.06 3.14 5 4.4.7.3 1.24.48 1.66.61.7.22 1.34.19 1.85.12.56-.08 1.72-.7 1.96-1.38.24-.67.24-1.25.17-1.38-.07-.12-.26-.19-.55-.34Z" />
     </svg>
   );
@@ -262,7 +262,7 @@ export default function Storefront() {
         target="_blank"
         rel="noreferrer"
         aria-label="Contactar por WhatsApp"
-        className="motion-button motion-float fixed bottom-5 right-5 z-40 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-soft transition hover:scale-105 hover:bg-pistachio focus:outline-none focus:ring-4 focus:ring-[#25D366]/30"
+        className="whatsapp-float fixed bottom-5 right-5 z-50 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_18px_45px_rgba(37,211,102,0.45)] ring-4 ring-white/80 transition hover:bg-[#1ebe5d] focus:outline-none focus:ring-4 focus:ring-[#25D366]/35 sm:bottom-8 sm:right-8 sm:h-20 sm:w-20"
       >
         <WhatsAppIcon />
       </a>

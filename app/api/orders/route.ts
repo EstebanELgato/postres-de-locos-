@@ -174,28 +174,41 @@ export async function POST(request: Request) {
     });
     const totalAmount = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
 
-    const { data: customer, error: customerError } = await supabase
+    const { data: existingCustomer, error: findCustomerError } = await supabase
       .from("customers")
-      .upsert(
-        {
-          document_number: documentNumber,
+      .select("id")
+      .eq("cedula", documentNumber)
+      .maybeSingle();
+
+    if (findCustomerError) {
+      throw findCustomerError;
+    }
+
+    let customerId = existingCustomer?.id;
+
+    if (!customerId) {
+      const { data: newCustomer, error: createCustomerError } = await supabase
+        .from("customers")
+        .insert({
+          cedula: documentNumber,
           full_name: fullName,
           email,
           phone
-        },
-        { onConflict: "document_number" }
-      )
-      .select("id")
-      .single();
+        })
+        .select("id")
+        .single();
 
-    if (customerError) {
-      throw customerError;
+      if (createCustomerError) {
+        throw createCustomerError;
+      }
+
+      customerId = newCustomer.id;
     }
 
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
-        customer_id: customer.id,
+        customer_id: customerId,
         delivery_address: deliveryAddress,
         delivery_date: todayDate(),
         observations: observations || null,
@@ -221,7 +234,7 @@ export async function POST(request: Request) {
     const salesRows = (insertedItems || []).map((item) => ({
       order_id: order.id,
       order_item_id: item.id,
-      customer_id: customer.id,
+      customer_id: customerId,
       customer_document: documentNumber,
       dessert_id: item.dessert_id,
       customer_name: fullName,
