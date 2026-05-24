@@ -161,7 +161,7 @@ export default function AdminDashboard() {
         [
           order.id,
           order.customer_id,
-          order.customers?.document_number,
+          order.customers?.cedula,
           order.delivery_address,
           order.status,
           order.customers?.full_name,
@@ -263,7 +263,7 @@ export default function AdminDashboard() {
         postre_id: item.dessert_id,
         fecha_pedido: formatDate(order.created_at),
         cliente: order.customers?.full_name || "",
-        cedula: order.customers?.document_number || "",
+        cedula: order.customers?.cedula || "",
         correo: order.customers?.email || "",
         telefono: order.customers?.phone || "",
         direccion_entrega: order.delivery_address,
@@ -599,7 +599,7 @@ export default function AdminDashboard() {
                       <td className="py-4 pr-4 font-black">#{order.id}</td>
                       <td className="py-4 pr-4">
                         <p className="font-black">{order.customers?.full_name}</p>
-                        <p className="text-cocoa/60">CC {order.customers?.document_number}</p>
+                        <p className="text-cocoa/60">CC {order.customers?.cedula}</p>
                         <p className="text-cocoa/60">{order.customers?.email}</p>
                       </td>
                       <td className="py-4 pr-4">{order.customers?.phone}</td>

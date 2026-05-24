@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         created_at,
         customers (
           id,
-          document_number,
+          cedula,
           full_name,
           email,
           phone

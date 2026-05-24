@@ -43,7 +43,7 @@ export type AdminOrder = {
   created_at: string;
   customers: {
     id: number;
-    document_number: string;
+    cedula: string;
     full_name: string;
     email: string;
     phone: string;
