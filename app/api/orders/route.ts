@@ -174,19 +174,44 @@ export async function POST(request: Request) {
     });
     const totalAmount = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
 
-    const { data: customer, error: customerError } = await supabase
+    const { data: existingCustomer, error: findCustomerError } = await supabase
       .from("customers")
-      .upsert(
-        {
+      .select("id")
+      .or(`document_number.eq.${documentNumber},cedula.eq.${documentNumber}`)
+      .order("id", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (findCustomerError) {
+      throw findCustomerError;
+    }
+
+    const customerMutation = existingCustomer
+      ? supabase
+        .from("customers")
+        .update({
           document_number: documentNumber,
+          cedula: documentNumber,
           full_name: fullName,
           email,
           phone
-        },
-        { onConflict: "document_number" }
-      )
-      .select("id")
-      .single();
+        })
+        .eq("id", existingCustomer.id)
+        .select("id")
+        .single()
+      : supabase
+        .from("customers")
+        .insert({
+          document_number: documentNumber,
+          cedula: documentNumber,
+          full_name: fullName,
+          email,
+          phone
+        })
+        .select("id")
+        .single();
+
+    const { data: customer, error: customerError } = await customerMutation;
 
     if (customerError) {
       throw customerError;

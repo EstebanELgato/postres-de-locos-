@@ -1,6 +1,7 @@
 create table if not exists public.customers (
   id bigint generated always as identity primary key,
   document_number text not null unique,
+  cedula text not null unique,
   full_name text not null,
   email text not null,
   phone text not null,
@@ -64,11 +65,27 @@ create table if not exists public.ventas (
 );
 
 alter table public.customers add column if not exists document_number text;
+alter table public.customers add column if not exists cedula text;
+update public.customers
+set document_number = cedula
+where cedula is not null
+  and btrim(cedula) <> ''
+  and (document_number is null or btrim(document_number) = '' or document_number like 'sin-cedula-%');
+update public.customers
+set cedula = document_number
+where document_number is not null
+  and btrim(document_number) <> ''
+  and (cedula is null or btrim(cedula) = '');
 update public.customers
 set document_number = 'sin-cedula-' || id
 where document_number is null or btrim(document_number) = '';
+update public.customers
+set cedula = document_number
+where cedula is null or btrim(cedula) = '';
 alter table public.customers alter column document_number set not null;
+alter table public.customers alter column cedula set not null;
 create unique index if not exists customers_document_number_key on public.customers(document_number);
+create unique index if not exists customers_cedula_key on public.customers(cedula);
 
 alter table public.ventas add column if not exists customer_document text;
 update public.ventas
