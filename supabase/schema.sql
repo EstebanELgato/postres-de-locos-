@@ -264,45 +264,66 @@ on conflict (order_item_id) do update set
 drop view if exists public.ventas_resumen;
 
 create view public.ventas_resumen as
+with items_cliente as (
+  select
+    orders.customer_id,
+    order_items.dessert_name,
+    sum(order_items.quantity) as cantidad
+  from public.orders
+  join public.order_items on order_items.order_id = orders.id
+  group by orders.customer_id, order_items.dessert_name
+),
+resumen_items as (
+  select
+    customer_id,
+    string_agg(
+      dessert_name || ': ' || cantidad ||
+        case when cantidad = 1 then ' unidad' else ' unidades' end,
+      ', '
+      order by dessert_name
+    ) as postres,
+    sum(cantidad) as total_unidades
+  from items_cliente
+  group by customer_id
+),
+resumen_pedidos as (
+  select
+    customer_id,
+    count(*) as total_pedidos,
+    sum(total_amount) as total_pedido,
+    max(created_at) as fecha_pedido
+  from public.orders
+  group by customer_id
+),
+ultimo_pedido as (
+  select distinct on (customer_id)
+    customer_id,
+    delivery_address,
+    observations,
+    status,
+    payment_method,
+    admin_notes
+  from public.orders
+  order by customer_id, created_at desc
+)
 select
-  orders.id as order_id,
   customers.id as customer_id,
   customers.document_number as cedula,
   customers.full_name as cliente,
   customers.phone as telefono,
   customers.email as correo,
-  string_agg(
-    order_items.dessert_name || ': ' || order_items.quantity ||
-      case
-        when order_items.quantity = 1 then ' unidad'
-        else ' unidades'
-      end,
-    ', '
-    order by order_items.dessert_name
-  ) as postres,
-  sum(order_items.quantity) as total_unidades,
-  orders.total_amount as total_pedido,
-  orders.payment_method as metodo_pago,
-  orders.delivery_address as direccion_entrega,
-  orders.observations as observaciones,
-  orders.admin_notes as notas_admin,
-  orders.status as estado,
-  orders.created_at as fecha_pedido
-from public.orders
-join public.customers on customers.id = orders.customer_id
-join public.order_items on order_items.order_id = orders.id
-group by
-  orders.id,
-  customers.id,
-  customers.document_number,
-  customers.full_name,
-  customers.phone,
-  customers.email,
-  orders.total_amount,
-  orders.payment_method,
-  orders.delivery_address,
-  orders.observations,
-  orders.admin_notes,
-  orders.status,
-  orders.created_at
-order by orders.created_at desc;
+  resumen_items.postres,
+  resumen_items.total_unidades,
+  resumen_pedidos.total_pedidos,
+  resumen_pedidos.total_pedido,
+  ultimo_pedido.payment_method as metodo_pago,
+  ultimo_pedido.delivery_address as direccion_entrega,
+  ultimo_pedido.observations as observaciones,
+  ultimo_pedido.admin_notes as notas_admin,
+  ultimo_pedido.status as estado,
+  resumen_pedidos.fecha_pedido
+from public.customers
+join resumen_items on resumen_items.customer_id = customers.id
+join resumen_pedidos on resumen_pedidos.customer_id = customers.id
+join ultimo_pedido on ultimo_pedido.customer_id = customers.id
+order by resumen_pedidos.fecha_pedido desc;

@@ -9,7 +9,7 @@ type SupabaseOrder = Omit<AdminOrder, "customers"> & {
   customers: AdminOrder["customers"] | AdminOrder["customers"][];
 };
 
-const allowedStatuses = new Set(["recibido", "pagado"]);
+const allowedStatuses = new Set(["recibido", "pagado", "cancelado"]);
 const allowedPaymentMethods = new Set(["efectivo", "transferencia"]);
 
 function cleanText(value: unknown) {
@@ -131,11 +131,15 @@ export async function PATCH(request: NextRequest) {
       status?: string;
       paymentMethod?: string | null;
       adminNotes?: string | null;
+      deliveryAddress?: string | null;
+      observations?: string | null;
     };
     const orderId = parseOrderId(body.orderId);
     const status = cleanText(body.status).toLowerCase();
     const requestedPaymentMethod = cleanText(body.paymentMethod).toLowerCase();
     const adminNotes = cleanText(body.adminNotes) || null;
+    const deliveryAddress = body.deliveryAddress !== undefined ? (cleanText(body.deliveryAddress) || null) : undefined;
+    const observations = body.observations !== undefined ? (cleanText(body.observations) || null) : undefined;
 
     if (!orderId) {
       return NextResponse.json({ message: "ID de pedido invalido." }, { status: 400 });
@@ -154,29 +158,37 @@ export async function PATCH(request: NextRequest) {
 
     const paymentMethod = status === "pagado" ? requestedPaymentMethod : null;
 
+    const orderUpdate: Record<string, unknown> = {
+      status,
+      payment_method: paymentMethod,
+      admin_notes: adminNotes
+    };
+    if (deliveryAddress !== undefined) orderUpdate.delivery_address = deliveryAddress;
+    if (observations !== undefined) orderUpdate.observations = observations;
+
     const supabase = getSupabaseAdmin();
     const { data: order, error: orderError } = await supabase
       .from("orders")
-      .update({
-        status,
-        payment_method: paymentMethod,
-        admin_notes: adminNotes
-      })
+      .update(orderUpdate)
       .eq("id", orderId)
-      .select("id, status, payment_method, admin_notes")
+      .select("id, status, payment_method, admin_notes, delivery_address, observations")
       .single();
 
     if (orderError) {
       throw orderError;
     }
 
+    const ventasUpdate: Record<string, unknown> = {
+      status,
+      payment_method: paymentMethod,
+      admin_notes: adminNotes
+    };
+    if (deliveryAddress !== undefined) ventasUpdate.delivery_address = deliveryAddress;
+    if (observations !== undefined) ventasUpdate.observations = observations;
+
     const { error: salesError } = await supabase
       .from("ventas")
-      .update({
-        status,
-        payment_method: paymentMethod,
-        admin_notes: adminNotes
-      })
+      .update(ventasUpdate)
       .eq("order_id", orderId);
 
     if (salesError) {
@@ -194,6 +206,39 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json(
       { message: "No se pudo actualizar el pedido." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  const token = request.cookies.get(getAdminCookieName())?.value;
+
+  if (!verifyAdminSessionToken(token)) {
+    return NextResponse.json({ message: "No autorizado." }, { status: 401 });
+  }
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const orderId = parseOrderId(searchParams.get("orderId"));
+
+    if (!orderId) {
+      return NextResponse.json({ message: "ID de pedido invalido." }, { status: 400 });
+    }
+
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("orders")
+      .delete()
+      .eq("id", orderId);
+
+    if (error) throw error;
+
+    return NextResponse.json({ message: "Pedido eliminado correctamente." });
+  } catch (error) {
+    console.error("Admin order delete error", error);
+    return NextResponse.json(
+      { message: "No se pudo eliminar el pedido." },
       { status: 500 }
     );
   }

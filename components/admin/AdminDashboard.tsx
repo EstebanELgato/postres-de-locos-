@@ -20,7 +20,7 @@ const initialLogin: LoginState = {
   password: ""
 };
 
-const orderStatusOptions = ["recibido", "pagado"];
+const orderStatusOptions = ["recibido", "pagado", "cancelado"];
 const paymentMethodOptions = ["efectivo", "transferencia"];
 
 function Spinner({ dark = false }: { dark?: boolean }) {
@@ -114,6 +114,7 @@ export default function AdminDashboard() {
   const [dateFilter, setDateFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
   const [savingOrderId, setSavingOrderId] = useState<number | null>(null);
+  const [deletingOrderId, setDeletingOrderId] = useState<number | null>(null);
 
   const loadOrders = useCallback(async () => {
     setIsLoading(true);
@@ -268,12 +269,36 @@ export default function AdminDashboard() {
     );
   }
 
+  async function deleteOrder(orderId: number) {
+    if (!window.confirm(`¿Eliminar el pedido #${orderId}? Esta acción no se puede deshacer.`)) return;
+
+    setDeletingOrderId(orderId);
+    setMessage("");
+
+    try {
+      const response = await fetch(`/api/admin/orders?orderId=${orderId}`, {
+        method: "DELETE"
+      });
+      const data = (await response.json()) as { message?: string };
+
+      if (!response.ok) throw new Error(data.message || "No se pudo eliminar el pedido.");
+
+      setOrders((current) => current.filter((order) => order.id !== orderId));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Error eliminando pedido.");
+    } finally {
+      setDeletingOrderId(null);
+    }
+  }
+
   async function saveOrderChanges(
     orderId: number,
     changes: {
       status: string;
       paymentMethod?: string | null;
       adminNotes?: string | null;
+      deliveryAddress?: string | null;
+      observations?: string | null;
     }
   ) {
     setSavingOrderId(orderId);
@@ -287,12 +312,16 @@ export default function AdminDashboard() {
         },
         body: JSON.stringify({
           orderId,
-          ...changes
+          status: changes.status,
+          paymentMethod: changes.paymentMethod,
+          adminNotes: changes.adminNotes,
+          deliveryAddress: changes.deliveryAddress,
+          observations: changes.observations
         })
       });
       const data = (await response.json()) as {
         message?: string;
-        order?: Pick<AdminOrder, "id" | "status" | "payment_method" | "admin_notes">;
+        order?: Pick<AdminOrder, "id" | "status" | "payment_method" | "admin_notes" | "delivery_address" | "observations">;
       };
 
       if (!response.ok) {
@@ -303,7 +332,9 @@ export default function AdminDashboard() {
         updateOrderLocally(orderId, {
           status: data.order.status,
           payment_method: data.order.payment_method,
-          admin_notes: data.order.admin_notes
+          admin_notes: data.order.admin_notes,
+          delivery_address: data.order.delivery_address ?? undefined,
+          observations: data.order.observations ?? undefined
         });
       }
     } catch (error) {
@@ -636,7 +667,7 @@ export default function AdminDashboard() {
             </button>
           </div>
           <div className="mt-5 overflow-x-auto">
-            <table className="w-full min-w-[1260px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[1480px] border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-caramel/20 text-cocoa/65">
                   <th className="py-3 pr-4">Fecha</th>
@@ -644,17 +675,19 @@ export default function AdminDashboard() {
                   <th className="py-3 pr-4">Cliente</th>
                   <th className="py-3 pr-4">Contacto</th>
                   <th className="py-3 pr-4">Dirección</th>
+                  <th className="py-3 pr-4">Observ.</th>
                   <th className="py-3 pr-4">Productos</th>
                   <th className="py-3 pr-4">Total</th>
                   <th className="py-3 pr-4">Estado</th>
                   <th className="py-3 pr-4">Pago</th>
                   <th className="py-3 pr-4">Notas</th>
+                  <th className="py-3 pr-4">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="py-6 text-cocoa/60">No hay pedidos para mostrar.</td>
+                    <td colSpan={12} className="py-6 text-cocoa/60">No hay pedidos para mostrar.</td>
                   </tr>
                 ) : (
                   filteredOrders.map((order) => (
@@ -667,7 +700,41 @@ export default function AdminDashboard() {
                         <p className="text-cocoa/60">{order.customers?.email}</p>
                       </td>
                       <td className="py-4 pr-4">{order.customers?.phone}</td>
-                      <td className="py-4 pr-4">{order.delivery_address}</td>
+                      <td className="py-4 pr-4">
+                        <textarea
+                          value={order.delivery_address}
+                          disabled={savingOrderId === order.id || deletingOrderId === order.id}
+                          onChange={(event) => updateOrderLocally(order.id, { delivery_address: event.target.value })}
+                          onBlur={(event) => {
+                            void saveOrderChanges(order.id, {
+                              status: order.status,
+                              paymentMethod: order.payment_method,
+                              adminNotes: order.admin_notes,
+                              deliveryAddress: event.currentTarget.value,
+                              observations: order.observations
+                            });
+                          }}
+                          className="motion-input min-h-16 w-44 resize-y rounded-md border border-caramel/20 bg-cream px-3 py-2 text-sm outline-none ring-caramel/20 transition focus:ring-4 disabled:opacity-60"
+                        />
+                      </td>
+                      <td className="py-4 pr-4">
+                        <textarea
+                          value={order.observations || ""}
+                          disabled={savingOrderId === order.id || deletingOrderId === order.id}
+                          onChange={(event) => updateOrderLocally(order.id, { observations: event.target.value })}
+                          onBlur={(event) => {
+                            void saveOrderChanges(order.id, {
+                              status: order.status,
+                              paymentMethod: order.payment_method,
+                              adminNotes: order.admin_notes,
+                              deliveryAddress: order.delivery_address,
+                              observations: event.currentTarget.value
+                            });
+                          }}
+                          className="motion-input min-h-16 w-44 resize-y rounded-md border border-caramel/20 bg-cream px-3 py-2 text-sm outline-none ring-caramel/20 transition focus:ring-4 disabled:opacity-60"
+                          placeholder="Sin observaciones"
+                        />
+                      </td>
                       <td className="py-4 pr-4">
                         {order.order_items.map((item) => (
                           <p key={item.id}>
@@ -733,13 +800,15 @@ export default function AdminDashboard() {
                       <td className="py-4 pr-4">
                         <textarea
                           value={order.admin_notes || ""}
-                          disabled={savingOrderId === order.id}
+                          disabled={savingOrderId === order.id || deletingOrderId === order.id}
                           onChange={(event) => updateOrderLocally(order.id, { admin_notes: event.target.value })}
                           onBlur={(event) => {
                             void saveOrderChanges(order.id, {
                               status: order.status,
                               paymentMethod: order.payment_method,
-                              adminNotes: event.currentTarget.value
+                              adminNotes: event.currentTarget.value,
+                              deliveryAddress: order.delivery_address,
+                              observations: order.observations
                             });
                           }}
                           className="motion-input min-h-20 w-56 resize-y rounded-md border border-caramel/20 bg-cream px-3 py-2 text-sm outline-none ring-caramel/20 transition focus:ring-4 disabled:opacity-60"
@@ -748,6 +817,16 @@ export default function AdminDashboard() {
                         {savingOrderId === order.id ? (
                           <p className="mt-1 text-xs font-bold text-caramel">Guardando...</p>
                         ) : null}
+                      </td>
+                      <td className="py-4 pr-4">
+                        <button
+                          type="button"
+                          onClick={() => void deleteOrder(order.id)}
+                          disabled={deletingOrderId === order.id || savingOrderId === order.id}
+                          className="motion-button rounded-full bg-berry px-3 py-2 text-xs font-black text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {deletingOrderId === order.id ? "Eliminando..." : "Eliminar"}
+                        </button>
                       </td>
                     </tr>
                   ))
