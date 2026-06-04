@@ -264,18 +264,34 @@ on conflict (order_item_id) do update set
 drop view if exists public.ventas_resumen;
 
 create view public.ventas_resumen as
-with items_cliente as (
+with base as (
   select
+    regexp_replace(customers.document_number, '[^0-9]', '', 'g') as cedula,
+    orders.id as order_id,
     orders.customer_id,
+    orders.total_amount,
+    orders.created_at,
+    orders.delivery_address,
+    orders.observations,
+    orders.status,
+    orders.payment_method,
+    orders.admin_notes
+  from public.orders
+  join public.customers on customers.id = orders.customer_id
+),
+items_cedula as (
+  select
+    regexp_replace(customers.document_number, '[^0-9]', '', 'g') as cedula,
     order_items.dessert_name,
     sum(order_items.quantity) as cantidad
   from public.orders
+  join public.customers on customers.id = orders.customer_id
   join public.order_items on order_items.order_id = orders.id
-  group by orders.customer_id, order_items.dessert_name
+  group by 1, order_items.dessert_name
 ),
 resumen_items as (
   select
-    customer_id,
+    cedula,
     string_agg(
       dessert_name || ': ' || cantidad ||
         case when cantidad = 1 then ' unidad' else ' unidades' end,
@@ -283,32 +299,33 @@ resumen_items as (
       order by dessert_name
     ) as postres,
     sum(cantidad) as total_unidades
-  from items_cliente
-  group by customer_id
+  from items_cedula
+  group by cedula
 ),
 resumen_pedidos as (
   select
-    customer_id,
+    cedula,
     count(*) as total_pedidos,
     sum(total_amount) as total_pedido,
     max(created_at) as fecha_pedido
-  from public.orders
-  group by customer_id
+  from base
+  group by cedula
 ),
 ultimo_pedido as (
-  select distinct on (customer_id)
+  select distinct on (cedula)
+    cedula,
     customer_id,
     delivery_address,
     observations,
     status,
     payment_method,
     admin_notes
-  from public.orders
-  order by customer_id, created_at desc
+  from base
+  order by cedula, created_at desc
 )
 select
-  customers.id as customer_id,
-  customers.document_number as cedula,
+  ultimo_pedido.customer_id,
+  resumen_items.cedula,
   customers.full_name as cliente,
   customers.phone as telefono,
   customers.email as correo,
@@ -322,8 +339,8 @@ select
   ultimo_pedido.admin_notes as notas_admin,
   ultimo_pedido.status as estado,
   resumen_pedidos.fecha_pedido
-from public.customers
-join resumen_items on resumen_items.customer_id = customers.id
-join resumen_pedidos on resumen_pedidos.customer_id = customers.id
-join ultimo_pedido on ultimo_pedido.customer_id = customers.id
+from resumen_items
+join resumen_pedidos on resumen_pedidos.cedula = resumen_items.cedula
+join ultimo_pedido on ultimo_pedido.cedula = resumen_items.cedula
+join public.customers on customers.id = ultimo_pedido.customer_id
 order by resumen_pedidos.fecha_pedido desc;
