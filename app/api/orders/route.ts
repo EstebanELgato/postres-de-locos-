@@ -299,7 +299,8 @@ export async function POST(request: Request) {
       observations ? `Observaciones: ${observations}` : null,
       "",
       productLines,
-      `Total: ${formatCOP(totalAmount)}`
+      `Total: ${formatCOP(totalAmount)}`,
+      "build: v3"
     ]
       .filter((line) => line !== null)
       .join("\n");
