@@ -70,6 +70,11 @@ function todayDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function formatCOP(value: number) {
+  const safe = Number.isFinite(value) ? Math.round(value) : 0;
+  return "$" + safe.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " COP";
+}
+
 async function notifyWhatsApp(message: string) {
   const phone = process.env.ADMIN_WHATSAPP_PHONE ?? "573114591424";
   const apikey = process.env.CALLMEBOT_APIKEY ?? "8399840";
@@ -283,7 +288,7 @@ export async function POST(request: Request) {
     }
 
     const productLines = orderItems
-      .map((item) => `- ${item.quantity} x ${item.dessert_name}`)
+      .map((item) => `- ${item.quantity} x ${item.dessert_name} (${formatCOP(Number(item.subtotal))})`)
       .join("\n");
     const message = [
       `Nuevo pedido #${order.id} - Postres de Locos`,
@@ -294,7 +299,7 @@ export async function POST(request: Request) {
       observations ? `Observaciones: ${observations}` : null,
       "",
       productLines,
-      `Total: $${Math.round(totalAmount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} COP`
+      `Total: ${formatCOP(totalAmount)}`
     ]
       .filter((line) => line !== null)
       .join("\n");
