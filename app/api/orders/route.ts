@@ -175,7 +175,7 @@ export async function POST(request: Request) {
     const dessertsById = new Map(desserts.map((dessert) => [Number(dessert.id), dessert]));
     const orderItems = normalizedItems.map((item) => {
       const dessert = dessertsById.get(item.dessertId);
-      const unitPrice = Number(dessert?.price || 0);
+      const unitPrice = Number(dessert?.price) || 10000;
 
       return {
         dessert_id: item.dessertId,
