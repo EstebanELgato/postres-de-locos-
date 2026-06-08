@@ -70,6 +70,20 @@ function todayDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
+async function notifyWhatsApp(message: string) {
+  const phone = process.env.ADMIN_WHATSAPP_PHONE;
+  const apikey = process.env.CALLMEBOT_APIKEY;
+
+  if (!phone || !apikey) return;
+
+  try {
+    const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(message)}&apikey=${encodeURIComponent(apikey)}`;
+    await fetch(url, { method: "GET" });
+  } catch (error) {
+    console.error("WhatsApp notification error", error);
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const clientIp = getClientIp(request);
@@ -268,6 +282,25 @@ export async function POST(request: Request) {
     if (salesError) {
       throw salesError;
     }
+
+    const productLines = orderItems
+      .map((item) => `- ${item.quantity} x ${item.dessert_name}`)
+      .join("\n");
+    const message = [
+      `Nuevo pedido #${order.id} - Postres de Locos`,
+      `Cliente: ${fullName}`,
+      `Cedula: ${documentNumber}`,
+      `Telefono: ${phone}`,
+      `Direccion: ${deliveryAddress}`,
+      observations ? `Observaciones: ${observations}` : null,
+      "",
+      productLines,
+      `Total: $${totalAmount.toLocaleString("es-CO")}`
+    ]
+      .filter((line) => line !== null)
+      .join("\n");
+
+    await notifyWhatsApp(message);
 
     return NextResponse.json({
       message: "Pedido enviado correctamente. Te contactaremos por WhatsApp o correo.",
