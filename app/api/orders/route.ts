@@ -294,7 +294,7 @@ export async function POST(request: Request) {
       observations ? `Observaciones: ${observations}` : null,
       "",
       productLines,
-      `Total: $${totalAmount.toLocaleString("es-CO")}`
+      `Total: $${Math.round(totalAmount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} COP`
     ]
       .filter((line) => line !== null)
       .join("\n");
