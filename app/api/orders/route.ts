@@ -72,7 +72,7 @@ function todayDate() {
 
 function formatCOP(value: number) {
   const safe = Number.isFinite(value) ? Math.round(value) : 0;
-  return "$" + safe.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " COP";
+  return safe.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " COP";
 }
 
 async function notifyWhatsApp(message: string) {
@@ -299,8 +299,7 @@ export async function POST(request: Request) {
       observations ? `Observaciones: ${observations}` : null,
       "",
       productLines,
-      `Total: ${formatCOP(totalAmount)}`,
-      "build: v3"
+      `Total: ${formatCOP(totalAmount)}`
     ]
       .filter((line) => line !== null)
       .join("\n");
