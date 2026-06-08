@@ -77,7 +77,8 @@ async function notifyWhatsApp(message: string) {
   if (!phone || !apikey) return;
 
   try {
-    const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(message)}&apikey=${encodeURIComponent(apikey)}`;
+    const cleanPhone = phone.replace(/[^0-9]/g, "");
+  const url = `https://api.callmebot.com/whatsapp.php?phone=${cleanPhone}&text=${encodeURIComponent(message)}&apikey=${encodeURIComponent(apikey)}`;
     await fetch(url, { method: "GET" });
   } catch (error) {
     console.error("WhatsApp notification error", error);
