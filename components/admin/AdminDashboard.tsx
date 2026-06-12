@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import { DESSERTS, formatCurrency } from "@/lib/desserts";
 import type { AdminOrder, AdminOrderItem, SalesSummaryItem } from "@/lib/types";
@@ -117,6 +117,28 @@ export default function AdminDashboard() {
   const [deletingOrderId, setDeletingOrderId] = useState<number | null>(null);
   const [savingItemsOrderId, setSavingItemsOrderId] = useState<number | null>(null);
   const [editedItems, setEditedItems] = useState<Record<number, AdminOrderItem[]>>({});
+
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const topScrollRef = useRef<HTMLDivElement>(null);
+  const isSyncingScroll = useRef(false);
+
+  function scrollTableBy(amount: number) {
+    tableScrollRef.current?.scrollBy({ left: amount, behavior: "smooth" });
+  }
+
+  function syncFromTop() {
+    if (isSyncingScroll.current || !tableScrollRef.current || !topScrollRef.current) return;
+    isSyncingScroll.current = true;
+    tableScrollRef.current.scrollLeft = topScrollRef.current.scrollLeft;
+    isSyncingScroll.current = false;
+  }
+
+  function syncFromTable() {
+    if (isSyncingScroll.current || !tableScrollRef.current || !topScrollRef.current) return;
+    isSyncingScroll.current = true;
+    topScrollRef.current.scrollLeft = tableScrollRef.current.scrollLeft;
+    isSyncingScroll.current = false;
+  }
 
   const loadOrders = useCallback(async () => {
     setIsLoading(true);
@@ -762,7 +784,32 @@ export default function AdminDashboard() {
               Exportar pedidos a Excel
             </button>
           </div>
-          <div className="mt-5 overflow-x-auto">
+          <div className="mt-5 flex items-center gap-2">
+            <button
+              type="button"
+              aria-label="Desplazar a la izquierda"
+              onClick={() => scrollTableBy(-360)}
+              className="motion-button flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-caramel/30 bg-white text-lg font-black text-cocoa shadow-soft transition hover:-translate-y-0.5 hover:bg-honey"
+            >
+              ‹
+            </button>
+            <div
+              ref={topScrollRef}
+              onScroll={syncFromTop}
+              className="admin-top-scroll flex-1 overflow-x-auto"
+            >
+              <div className="h-px min-w-[1480px]" />
+            </div>
+            <button
+              type="button"
+              aria-label="Desplazar a la derecha"
+              onClick={() => scrollTableBy(360)}
+              className="motion-button flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-caramel/30 bg-white text-lg font-black text-cocoa shadow-soft transition hover:-translate-y-0.5 hover:bg-honey"
+            >
+              ›
+            </button>
+          </div>
+          <div ref={tableScrollRef} onScroll={syncFromTable} className="mt-2 overflow-x-auto">
             <table className="w-full min-w-[1480px] border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-caramel/20 text-cocoa/65">

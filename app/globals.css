@@ -201,6 +201,24 @@ select:focus {
   animation: notice-pop 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.admin-top-scroll {
+  scrollbar-width: thin;
+}
+
+.admin-top-scroll::-webkit-scrollbar {
+  height: 10px;
+}
+
+.admin-top-scroll::-webkit-scrollbar-thumb {
+  background: rgba(195, 107, 32, 0.45);
+  border-radius: 9999px;
+}
+
+.admin-top-scroll::-webkit-scrollbar-track {
+  background: rgba(195, 107, 32, 0.12);
+  border-radius: 9999px;
+}
+
 @keyframes notice-wiggle {
   0%,
   100% {
