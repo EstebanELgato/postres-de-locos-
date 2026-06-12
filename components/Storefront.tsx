@@ -426,18 +426,23 @@ export default function Storefront() {
                     </div>
                   </div>
                   {(selectedQuantities[dessert.id] || 1) > MAX_PER_DESSERT ? (
-                    <p className="rounded-md bg-berry/10 px-3 py-2 text-sm font-bold leading-5 text-berry">
-                      No es posible esta cantidad de {dessert.name}. Por favor contáctate al{" "}
-                      <a
-                        href={`https://wa.me/${WHATSAPP_NUMBER}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="underline"
-                      >
-                        WhatsApp
-                      </a>{" "}
-                      para brindarte una solución.
-                    </p>
+                    <div className="animate-notice flex items-start gap-3 rounded-xl border border-caramel/30 bg-honey/30 px-3 py-3 text-sm leading-5 text-cocoa shadow-soft">
+                      <span className="animate-notice-icon mt-0.5 text-lg" aria-hidden>
+                        🍰
+                      </span>
+                      <p className="font-semibold">
+                        Por ahora no tenemos esa cantidad de {dessert.name}. Escríbenos al{" "}
+                        <a
+                          href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-black text-[#1ebe5d] underline decoration-2 underline-offset-2 transition hover:text-[#16a34a]"
+                        >
+                          WhatsApp
+                        </a>{" "}
+                        y con gusto te damos una solución. 💛
+                      </p>
+                    </div>
                   ) : null}
                   <button
                     type="button"

@@ -181,6 +181,45 @@ select:focus {
   }
 }
 
+@keyframes notice-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+
+  60% {
+    transform: translateY(2px) scale(1.01);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-notice {
+  animation: notice-pop 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes notice-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(-9deg);
+  }
+
+  75% {
+    transform: rotate(9deg);
+  }
+}
+
+.animate-notice-icon {
+  animation: notice-wiggle 1.6s ease-in-out infinite;
+}
+
 main > section,
 main > div > section {
   animation: reveal-section 680ms ease-out both;
