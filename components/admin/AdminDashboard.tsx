@@ -2,8 +2,8 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import * as XLSX from "xlsx";
-import { formatCurrency } from "@/lib/desserts";
-import type { AdminOrder, SalesSummaryItem } from "@/lib/types";
+import { DESSERTS, formatCurrency } from "@/lib/desserts";
+import type { AdminOrder, AdminOrderItem, SalesSummaryItem } from "@/lib/types";
 
 type AdminResponse = {
   orders: AdminOrder[];
@@ -20,7 +20,7 @@ const initialLogin: LoginState = {
   password: ""
 };
 
-const orderStatusOptions = ["recibido", "pagado", "cancelado"];
+const orderStatusOptions = ["recibido", "pagado", "entregado", "cancelado"];
 const paymentMethodOptions = ["efectivo", "transferencia"];
 
 function Spinner({ dark = false }: { dark?: boolean }) {
@@ -115,6 +115,8 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [savingOrderId, setSavingOrderId] = useState<number | null>(null);
   const [deletingOrderId, setDeletingOrderId] = useState<number | null>(null);
+  const [savingItemsOrderId, setSavingItemsOrderId] = useState<number | null>(null);
+  const [editedItems, setEditedItems] = useState<Record<number, AdminOrderItem[]>>({});
 
   const loadOrders = useCallback(async () => {
     setIsLoading(true);
@@ -288,6 +290,100 @@ export default function AdminDashboard() {
       setMessage(error instanceof Error ? error.message : "Error eliminando pedido.");
     } finally {
       setDeletingOrderId(null);
+    }
+  }
+
+  function getOrderItems(order: AdminOrder) {
+    return editedItems[order.id] ?? order.order_items;
+  }
+
+  function setOrderItems(orderId: number, items: AdminOrderItem[]) {
+    setEditedItems((current) => ({ ...current, [orderId]: items }));
+  }
+
+  function changeItemQty(order: AdminOrder, dessertId: number, delta: number) {
+    const items = getOrderItems(order)
+      .map((item) =>
+        item.dessert_id === dessertId
+          ? { ...item, quantity: item.quantity + delta, subtotal: (item.quantity + delta) * Number(item.unit_price) }
+          : item
+      )
+      .filter((item) => item.quantity > 0);
+    setOrderItems(order.id, items);
+  }
+
+  function removeItem(order: AdminOrder, dessertId: number) {
+    setOrderItems(order.id, getOrderItems(order).filter((item) => item.dessert_id !== dessertId));
+  }
+
+  function addItem(order: AdminOrder, dessertId: number) {
+    const items = getOrderItems(order);
+    if (items.some((item) => item.dessert_id === dessertId)) {
+      changeItemQty(order, dessertId, 1);
+      return;
+    }
+    const dessert = DESSERTS.find((entry) => entry.id === dessertId);
+    if (!dessert) return;
+    setOrderItems(order.id, [
+      ...items,
+      {
+        id: -Date.now(),
+        dessert_id: dessert.id,
+        dessert_name: dessert.name,
+        quantity: 1,
+        unit_price: dessert.price,
+        subtotal: dessert.price,
+        created_at: new Date().toISOString()
+      }
+    ]);
+  }
+
+  function cancelItemsEdit(orderId: number) {
+    setEditedItems((current) => {
+      const next = { ...current };
+      delete next[orderId];
+      return next;
+    });
+  }
+
+  async function saveOrderItems(orderId: number) {
+    const items = editedItems[orderId];
+    if (!items) return;
+
+    if (items.length === 0) {
+      setMessage("El pedido debe tener al menos un postre. Usa Eliminar si quieres borrarlo.");
+      return;
+    }
+
+    setSavingItemsOrderId(orderId);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/admin/orders", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          items: items.map((item) => ({ dessertId: item.dessert_id, quantity: item.quantity }))
+        })
+      });
+      const data = (await response.json()) as {
+        message?: string;
+        total_amount?: number;
+        order_items?: AdminOrderItem[];
+      };
+
+      if (!response.ok) throw new Error(data.message || "No se pudieron guardar los productos.");
+
+      updateOrderLocally(orderId, {
+        order_items: data.order_items || items,
+        total_amount: data.total_amount ?? 0
+      });
+      cancelItemsEdit(orderId);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Error guardando productos.");
+    } finally {
+      setSavingItemsOrderId(null);
     }
   }
 
@@ -736,11 +832,93 @@ export default function AdminDashboard() {
                         />
                       </td>
                       <td className="py-4 pr-4">
-                        {order.order_items.map((item) => (
-                          <p key={item.id}>
-                            {item.quantity} x {item.dessert_name}
-                          </p>
-                        ))}
+                        {(() => {
+                          const items = getOrderItems(order);
+                          const dirty = editedItems[order.id] !== undefined;
+                          const busy = savingItemsOrderId === order.id;
+                          const availableToAdd = DESSERTS.filter(
+                            (dessert) => !items.some((item) => item.dessert_id === dessert.id)
+                          );
+                          return (
+                            <div className="w-64 space-y-2">
+                              {items.length === 0 ? (
+                                <p className="text-xs font-bold text-berry">Sin productos</p>
+                              ) : (
+                                items.map((item) => (
+                                  <div key={item.dessert_id} className="flex items-center justify-between gap-2">
+                                    <span className="min-w-0 flex-1 truncate font-bold">{item.dessert_name}</span>
+                                    <div className="flex items-center gap-1">
+                                      <button
+                                        type="button"
+                                        disabled={busy}
+                                        onClick={() => changeItemQty(order, item.dessert_id, -1)}
+                                        className="motion-button h-7 w-7 rounded-full bg-cream font-black text-cocoa transition hover:bg-caramel/30 disabled:opacity-50"
+                                      >
+                                        −
+                                      </button>
+                                      <span className="w-6 text-center font-black">{item.quantity}</span>
+                                      <button
+                                        type="button"
+                                        disabled={busy}
+                                        onClick={() => changeItemQty(order, item.dessert_id, 1)}
+                                        className="motion-button h-7 w-7 rounded-full bg-cream font-black text-cocoa transition hover:bg-caramel/30 disabled:opacity-50"
+                                      >
+                                        +
+                                      </button>
+                                      <button
+                                        type="button"
+                                        disabled={busy}
+                                        onClick={() => removeItem(order, item.dessert_id)}
+                                        className="motion-button ml-1 text-xs font-bold text-berry underline-offset-2 transition hover:underline disabled:opacity-50"
+                                      >
+                                        Quitar
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))
+                              )}
+
+                              {availableToAdd.length > 0 ? (
+                                <select
+                                  value=""
+                                  disabled={busy}
+                                  onChange={(event) => {
+                                    const id = Number(event.target.value);
+                                    if (id) addItem(order, id);
+                                    event.target.value = "";
+                                  }}
+                                  className="motion-input h-9 w-full rounded-md border border-caramel/20 bg-cream px-2 text-xs font-bold outline-none ring-caramel/20 transition focus:ring-4 disabled:opacity-50"
+                                >
+                                  <option value="">+ Agregar sabor...</option>
+                                  {availableToAdd.map((dessert) => (
+                                    <option key={dessert.id} value={dessert.id}>{dessert.name}</option>
+                                  ))}
+                                </select>
+                              ) : null}
+
+                              {dirty ? (
+                                <div className="flex gap-2 pt-1">
+                                  <button
+                                    type="button"
+                                    disabled={busy}
+                                    onClick={() => void saveOrderItems(order.id)}
+                                    className="motion-button rounded-full bg-pistachio px-3 py-1.5 text-xs font-black text-white transition hover:bg-cocoa disabled:opacity-50"
+                                  >
+                                    {busy ? "Guardando..." : "Guardar"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    disabled={busy}
+                                    onClick={() => cancelItemsEdit(order.id)}
+                                    className="motion-button rounded-full border border-caramel/30 px-3 py-1.5 text-xs font-black text-cocoa transition hover:bg-cream disabled:opacity-50"
+                                  >
+                                    Cancelar
+                                  </button>
+                                </div>
+                              ) : null}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="py-4 pr-4 font-black text-berry">{formatCurrency(Number(order.total_amount))}</td>
                       <td className="py-4 pr-4">

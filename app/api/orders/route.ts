@@ -24,6 +24,7 @@ type OrderRequest = {
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^\+?[0-9\s()\-]{7,20}$/;
 const documentPattern = /^[0-9]{5,12}$/;
+const MAX_PER_DESSERT = 5;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 20;
 const requestLog = new Map<string, number[]>();
@@ -154,6 +155,13 @@ export async function POST(request: Request) {
     if (normalizedItems.length === 0) {
       return NextResponse.json(
         { message: "Agrega al menos un postre al pedido." },
+        { status: 400 }
+      );
+    }
+
+    if (normalizedItems.some((item) => item.quantity > MAX_PER_DESSERT)) {
+      return NextResponse.json(
+        { message: "Cantidad no disponible para uno de los postres. Contactanos por WhatsApp para una solucion." },
         { status: 400 }
       );
     }

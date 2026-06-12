@@ -33,6 +33,8 @@ const initialForm: OrderForm = {
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^\+?[0-9\s()\-]{7,20}$/;
 const documentPattern = /^[0-9]{5,12}$/;
+const MAX_PER_DESSERT = 5;
+const WHATSAPP_NUMBER = "573114591424";
 
 function getInitialQuantities(): QuantityMap {
   return Object.fromEntries(DESSERTS.map((dessert) => [dessert.id, 1])) as QuantityMap;
@@ -97,6 +99,11 @@ export default function Storefront() {
 
     if (amount <= 0) {
       showToast("error", "La cantidad debe ser mayor a cero.");
+      return;
+    }
+
+    if (amount > MAX_PER_DESSERT) {
+      showToast("error", "Cantidad no disponible. Contáctanos por WhatsApp.");
       return;
     }
 
@@ -390,22 +397,53 @@ export default function Storefront() {
                     <p className="mt-2 min-h-20 text-sm leading-6 text-cocoa/70">{dessert.description}</p>
                   </div>
                   <div className="flex items-center justify-between gap-4">
-                    <label className="flex w-full items-center justify-between gap-3 text-sm font-bold text-cocoa/75">
-                      Cantidad
+                    <span className="text-sm font-bold text-cocoa/75">Cantidad</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        aria-label="Disminuir cantidad"
+                        onClick={() => updateQuantity(dessert.id, (selectedQuantities[dessert.id] || 1) - 1)}
+                        className="motion-button flex h-11 w-11 items-center justify-center rounded-md border border-caramel/25 bg-white text-xl font-black text-cocoa transition hover:bg-honey"
+                      >
+                        −
+                      </button>
                       <input
                         type="number"
                         min={1}
                         max={99}
                         value={selectedQuantities[dessert.id] || 1}
                         onChange={(event) => updateQuantity(dessert.id, Number(event.target.value))}
-                        className="motion-input h-11 w-24 rounded-md border border-caramel/25 bg-white px-3 text-center font-black outline-none ring-caramel/20 transition focus:ring-4"
+                        className="motion-input h-11 w-20 rounded-md border border-caramel/25 bg-white px-3 text-center font-black outline-none ring-caramel/20 transition focus:ring-4"
                       />
-                    </label>
+                      <button
+                        type="button"
+                        aria-label="Aumentar cantidad"
+                        onClick={() => updateQuantity(dessert.id, (selectedQuantities[dessert.id] || 1) + 1)}
+                        className="motion-button flex h-11 w-11 items-center justify-center rounded-md border border-caramel/25 bg-white text-xl font-black text-cocoa transition hover:bg-honey"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
+                  {(selectedQuantities[dessert.id] || 1) > MAX_PER_DESSERT ? (
+                    <p className="rounded-md bg-berry/10 px-3 py-2 text-sm font-bold leading-5 text-berry">
+                      No es posible esta cantidad de {dessert.name}. Por favor contáctate al{" "}
+                      <a
+                        href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline"
+                      >
+                        WhatsApp
+                      </a>{" "}
+                      para brindarte una solución.
+                    </p>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => addToOrder(dessert.id)}
-                    className="motion-button w-full rounded-full bg-cocoa px-5 py-3 font-black text-white transition hover:-translate-y-0.5 hover:bg-berry"
+                    disabled={(selectedQuantities[dessert.id] || 1) > MAX_PER_DESSERT}
+                    className="motion-button w-full rounded-full bg-cocoa px-5 py-3 font-black text-white transition hover:-translate-y-0.5 hover:bg-berry disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
                   >
                     Agregar al pedido
                   </button>
