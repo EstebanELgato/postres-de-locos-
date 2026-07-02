@@ -106,7 +106,6 @@ function lastSevenDays() {
 export default function AdminDashboard() {
   const [login, setLogin] = useState<LoginState>(initialLogin);
   const [orders, setOrders] = useState<AdminOrder[]>([]);
-  const [summary, setSummary] = useState<SalesSummaryItem[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -164,7 +163,6 @@ export default function AdminDashboard() {
       }
 
       setOrders(data.orders);
-      setSummary(data.summary);
       setIsAuthenticated(true);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Error cargando pedidos.");
@@ -223,10 +221,10 @@ export default function AdminDashboard() {
     () => ({
       orders: orders.length,
       filteredOrders: filteredOrders.length,
-      desserts: summary.reduce((sum, item) => sum + item.total_quantity, 0),
-      sold: summary.reduce((sum, item) => sum + Number(item.total_sold), 0)
+      desserts: visibleSummary.reduce((sum, item) => sum + item.total_quantity, 0),
+      sold: filteredOrders.reduce((sum, order) => sum + Number(order.total_amount), 0)
     }),
-    [filteredOrders.length, orders.length, summary]
+    [filteredOrders, orders.length, visibleSummary]
   );
 
   const todayStats = useMemo(() => {
@@ -238,8 +236,8 @@ export default function AdminDashboard() {
     };
   }, [orders]);
 
-  const topProduct = summary.length > 0
-    ? [...summary].sort((a, b) => b.total_quantity - a.total_quantity)[0]
+  const topProduct = visibleSummary.length > 0
+    ? [...visibleSummary].sort((a, b) => b.total_quantity - a.total_quantity)[0]
     : null;
 
   const salesByDay = useMemo(() => {
@@ -291,7 +289,6 @@ export default function AdminDashboard() {
     await fetch("/api/admin/logout", { method: "POST" });
     setIsAuthenticated(false);
     setOrders([]);
-    setSummary([]);
   }
 
   function updateOrderLocally(orderId: number, changes: Partial<AdminOrder>) {
@@ -659,8 +656,8 @@ export default function AdminDashboard() {
             <h2 className="text-2xl font-black">Productos destacados</h2>
             <p className="mt-1 text-sm text-cocoa/60">Participación por unidades vendidas.</p>
             <div className="mt-6 space-y-4">
-              {(summary.length ? summary : visibleSummary).slice(0, 5).map((item) => {
-                const max = Math.max(...summary.map((entry) => entry.total_quantity), 1);
+              {visibleSummary.slice(0, 5).map((item) => {
+                const max = Math.max(...visibleSummary.map((entry) => entry.total_quantity), 1);
                 return (
                   <div key={item.dessert_id}>
                     <div className="flex items-center justify-between gap-3 text-sm">
@@ -676,7 +673,7 @@ export default function AdminDashboard() {
                   </div>
                 );
               })}
-              {summary.length === 0 ? <p className="text-sm text-cocoa/60">Aún no hay ventas para graficar.</p> : null}
+              {visibleSummary.length === 0 ? <p className="text-sm text-cocoa/60">Aún no hay ventas para graficar.</p> : null}
             </div>
           </div>
         </section>
