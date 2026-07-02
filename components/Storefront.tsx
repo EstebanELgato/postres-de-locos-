@@ -380,13 +380,20 @@ export default function Storefront() {
                 className="motion-card group overflow-hidden rounded-lg border border-caramel/15 bg-cream shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-xl"
               >
                 <div className="relative aspect-[4/3] bg-white">
-                  <Image
-                    src={dessert.imageUrl}
-                    alt={`Postre de ${dessert.name}`}
-                    fill
-                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover transition duration-500 group-hover:scale-105"
-                  />
+                  {dessert.imageUrl ? (
+                    <Image
+                      src={dessert.imageUrl}
+                      alt={`Postre de ${dessert.name}`}
+                      fill
+                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                      className="object-cover transition duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-honey/40 via-cream to-caramel/20 text-cocoa/60">
+                      <span className="text-4xl">📷</span>
+                      <span className="text-sm font-black uppercase tracking-wide">Imagen próximamente</span>
+                    </div>
+                  )}
                   <span className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1 text-xs font-black text-berry shadow-soft">
                     {formatCurrency(dessert.price)}
                   </span>

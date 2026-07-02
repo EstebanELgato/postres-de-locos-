@@ -63,7 +63,7 @@ export const DESSERTS: Dessert[] = [
     description:
       "Nuestro nuevo sabor: chocolate intenso y cremoso que se funde en cada cucharada. Profundo, sedoso y adictivo para los verdaderos chocolovers.",
     price: DESSERT_PRICE,
-    imageUrl: "/images/chocolate.jpg",
+    imageUrl: "",
     active: true
   }
 ];
