@@ -113,6 +113,7 @@ export default function AdminDashboard() {
   const [message, setMessage] = useState("");
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [monthFilter, setMonthFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
   const [responsableFilter, setResponsableFilter] = useState("todos");
   const [savingOrderId, setSavingOrderId] = useState<number | null>(null);
@@ -193,6 +194,7 @@ export default function AdminDashboard() {
           ? !order.responsable
           : order.responsable === responsableFilter);
       const dateMatches = !dateFilter || orderDate === dateFilter;
+      const monthMatches = !monthFilter || orderDate.startsWith(monthFilter);
       const haystack = normalize(
         [
           order.id,
@@ -211,9 +213,9 @@ export default function AdminDashboard() {
           .join(" ")
       );
 
-      return statusMatches && responsableMatches && dateMatches && (!query || haystack.includes(query));
+      return statusMatches && responsableMatches && dateMatches && monthMatches && (!query || haystack.includes(query));
     });
-  }, [dateFilter, orders, search, statusFilter, responsableFilter]);
+  }, [dateFilter, monthFilter, orders, search, statusFilter, responsableFilter]);
 
   const visibleSummary = useMemo(() => buildSummary(filteredOrders), [filteredOrders]);
 
@@ -696,6 +698,15 @@ export default function AdminDashboard() {
                 />
               </label>
               <label className="space-y-2">
+                <span className="text-xs font-black uppercase text-cocoa/60">Mes</span>
+                <input
+                  type="month"
+                  value={monthFilter}
+                  onChange={(event) => setMonthFilter(event.target.value)}
+                  className="motion-input h-11 w-full rounded-md border border-caramel/20 bg-cream px-3 outline-none ring-caramel/20 transition focus:ring-4"
+                />
+              </label>
+              <label className="space-y-2">
                 <span className="text-xs font-black uppercase text-cocoa/60">Fecha</span>
                 <input
                   type="date"
@@ -742,6 +753,7 @@ export default function AdminDashboard() {
               onClick={() => {
                 setSearch("");
                 setDateFilter("");
+                setMonthFilter("");
                 setStatusFilter("todos");
                 setResponsableFilter("todos");
               }}
