@@ -42,6 +42,7 @@ export type AdminOrder = {
   status: string;
   payment_method: string | null;
   admin_notes: string | null;
+  responsable: string | null;
   created_at: string;
   customers: {
     id: number;

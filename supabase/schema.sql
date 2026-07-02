@@ -97,8 +97,10 @@ alter table public.ventas alter column customer_document set not null;
 
 alter table public.orders add column if not exists payment_method text;
 alter table public.orders add column if not exists admin_notes text;
+alter table public.orders add column if not exists responsable text;
 alter table public.ventas add column if not exists payment_method text;
 alter table public.ventas add column if not exists admin_notes text;
+alter table public.ventas add column if not exists responsable text;
 
 alter table public.orders alter column delivery_date drop not null;
 
@@ -196,6 +198,13 @@ values
     'Postre cremoso con base crocante de galletas ducales, nuestra mezcla especial, leche klim y sabor equilibrado.',
     10000,
     '/images/leche-klim.png',
+    true
+  ),
+  (
+    'Chocolate',
+    'Nuestro nuevo sabor: chocolate intenso y cremoso que se funde en cada cucharada. Profundo, sedoso y adictivo para los verdaderos chocolovers.',
+    10000,
+    '/images/chocolate.jpg',
     true
   )
 on conflict (name) do update set

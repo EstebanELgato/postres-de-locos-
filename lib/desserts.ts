@@ -6,7 +6,8 @@ export const DESSERTS: Dessert[] = [
   {
     id: 1,
     name: "Arequipe",
-    description: "Postre suave, dulce y cremoso, ideal para celebraciones o antojos especiales.",
+    description:
+      "Capas de arequipe casero que se derriten en la boca sobre una crema suave y sedosa. Dulce, envolvente y perfecto para consentirte.",
     price: DESSERT_PRICE,
     imageUrl: "/images/publicidad.jpg",
     active: true
@@ -14,7 +15,8 @@ export const DESSERTS: Dessert[] = [
   {
     id: 2,
     name: "Mora",
-    description: "Postre fresco con salsa de mora artesanal y una textura cremosa irresistible.",
+    description:
+      "Salsa de mora natural con ese punto agridulce que despierta el paladar, sobre una crema fresca e irresistible. Un antojo que no falla.",
     price: DESSERT_PRICE,
     imageUrl: "/images/mora.jpg",
     active: true
@@ -22,7 +24,8 @@ export const DESSERTS: Dessert[] = [
   {
     id: 3,
     name: "Maracuya",
-    description: "Sabor tropical con pulpa de maracuya, dulce y ligeramente acido.",
+    description:
+      "El sabor tropical de la maracuyá con su pulpa fresca y vibrante, entre dulce y ácido, para un postre que sabe a vacaciones.",
     price: DESSERT_PRICE,
     imageUrl: "/images/maracuya.jpg",
     active: true
@@ -30,7 +33,8 @@ export const DESSERTS: Dessert[] = [
   {
     id: 4,
     name: "Oreo",
-    description: "Base cremosa con trozos de galleta Oreo para quienes aman el chocolate.",
+    description:
+      "Crema aterciopelada cargada de trozos de galleta Oreo en cada cucharada. El favorito de los amantes del chocolate y la galleta.",
     price: DESSERT_PRICE,
     imageUrl: "/images/oreo.jpg",
     active: true
@@ -38,7 +42,8 @@ export const DESSERTS: Dessert[] = [
   {
     id: 5,
     name: "Limon",
-    description: "Postre fresco y cremoso con ralladura de limon, perfecto para dias calidos.",
+    description:
+      "Fresco, cremoso y con la chispa cítrica de la ralladura de limón. Ligero y refrescante, el bocado ideal para cualquier momento.",
     price: DESSERT_PRICE,
     imageUrl: "/images/limon.jpg",
     active: true
@@ -47,9 +52,18 @@ export const DESSERTS: Dessert[] = [
     id: 6,
     name: "Leche Klim",
     description:
-      "Postre cremoso con base crocante de galletas ducales, nuestra mezcla especial, leche klim y sabor equilibrado.",
+      "Nuestra receta estrella: base crocante de galleta ducales, crema especial y el inconfundible sabor de la leche Klim. Puro capricho casero.",
     price: DESSERT_PRICE,
     imageUrl: "/images/leche-klim.png",
+    active: true
+  },
+  {
+    id: 7,
+    name: "Chocolate",
+    description:
+      "Nuestro nuevo sabor: chocolate intenso y cremoso que se funde en cada cucharada. Profundo, sedoso y adictivo para los verdaderos chocolovers.",
+    price: DESSERT_PRICE,
+    imageUrl: "/images/chocolate.jpg",
     active: true
   }
 ];

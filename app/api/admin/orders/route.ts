@@ -11,6 +11,7 @@ type SupabaseOrder = Omit<AdminOrder, "customers"> & {
 
 const allowedStatuses = new Set(["recibido", "pagado", "entregado", "cancelado"]);
 const allowedPaymentMethods = new Set(["efectivo", "transferencia"]);
+const allowedResponsables = new Set(["esteban", "gloria"]);
 
 function cleanText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -48,6 +49,7 @@ export async function GET(request: NextRequest) {
         status,
         payment_method,
         admin_notes,
+        responsable,
         created_at,
         customers (
           id,
@@ -133,6 +135,7 @@ export async function PATCH(request: NextRequest) {
       adminNotes?: string | null;
       deliveryAddress?: string | null;
       observations?: string | null;
+      responsable?: string | null;
     };
     const orderId = parseOrderId(body.orderId);
     const status = cleanText(body.status).toLowerCase();
@@ -140,6 +143,14 @@ export async function PATCH(request: NextRequest) {
     const adminNotes = cleanText(body.adminNotes) || null;
     const deliveryAddress = body.deliveryAddress !== undefined ? (cleanText(body.deliveryAddress) || null) : undefined;
     const observations = body.observations !== undefined ? (cleanText(body.observations) || null) : undefined;
+    let responsable: string | null | undefined = undefined;
+    if (body.responsable !== undefined) {
+      const value = cleanText(body.responsable).toLowerCase();
+      if (value && !allowedResponsables.has(value)) {
+        return NextResponse.json({ message: "Responsable invalido." }, { status: 400 });
+      }
+      responsable = value || null;
+    }
 
     if (!orderId) {
       return NextResponse.json({ message: "ID de pedido invalido." }, { status: 400 });
@@ -165,13 +176,14 @@ export async function PATCH(request: NextRequest) {
     };
     if (deliveryAddress !== undefined) orderUpdate.delivery_address = deliveryAddress;
     if (observations !== undefined) orderUpdate.observations = observations;
+    if (responsable !== undefined) orderUpdate.responsable = responsable;
 
     const supabase = getSupabaseAdmin();
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .update(orderUpdate)
       .eq("id", orderId)
-      .select("id, status, payment_method, admin_notes, delivery_address, observations")
+      .select("id, status, payment_method, admin_notes, delivery_address, observations, responsable")
       .single();
 
     if (orderError) {
@@ -185,6 +197,7 @@ export async function PATCH(request: NextRequest) {
     };
     if (deliveryAddress !== undefined) ventasUpdate.delivery_address = deliveryAddress;
     if (observations !== undefined) ventasUpdate.observations = observations;
+    if (responsable !== undefined) ventasUpdate.responsable = responsable;
 
     const { error: salesError } = await supabase
       .from("ventas")

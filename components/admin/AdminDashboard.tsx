@@ -21,6 +21,7 @@ const initialLogin: LoginState = {
 };
 
 const orderStatusOptions = ["recibido", "pagado", "entregado", "cancelado"];
+const responsableOptions = ["esteban", "gloria"];
 const paymentMethodOptions = ["efectivo", "transferencia"];
 
 function Spinner({ dark = false }: { dark?: boolean }) {
@@ -113,6 +114,7 @@ export default function AdminDashboard() {
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
+  const [responsableFilter, setResponsableFilter] = useState("todos");
   const [savingOrderId, setSavingOrderId] = useState<number | null>(null);
   const [deletingOrderId, setDeletingOrderId] = useState<number | null>(null);
   const [savingItemsOrderId, setSavingItemsOrderId] = useState<number | null>(null);
@@ -185,6 +187,11 @@ export default function AdminDashboard() {
     return orders.filter((order) => {
       const orderDate = toLocalDateKey(order.created_at);
       const statusMatches = statusFilter === "todos" || order.status === statusFilter;
+      const responsableMatches =
+        responsableFilter === "todos" ||
+        (responsableFilter === "sin"
+          ? !order.responsable
+          : order.responsable === responsableFilter);
       const dateMatches = !dateFilter || orderDate === dateFilter;
       const haystack = normalize(
         [
@@ -204,9 +211,9 @@ export default function AdminDashboard() {
           .join(" ")
       );
 
-      return statusMatches && dateMatches && (!query || haystack.includes(query));
+      return statusMatches && responsableMatches && dateMatches && (!query || haystack.includes(query));
     });
-  }, [dateFilter, orders, search, statusFilter]);
+  }, [dateFilter, orders, search, statusFilter, responsableFilter]);
 
   const visibleSummary = useMemo(() => buildSummary(filteredOrders), [filteredOrders]);
 
@@ -417,6 +424,7 @@ export default function AdminDashboard() {
       adminNotes?: string | null;
       deliveryAddress?: string | null;
       observations?: string | null;
+      responsable?: string | null;
     }
   ) {
     setSavingOrderId(orderId);
@@ -434,12 +442,13 @@ export default function AdminDashboard() {
           paymentMethod: changes.paymentMethod,
           adminNotes: changes.adminNotes,
           deliveryAddress: changes.deliveryAddress,
-          observations: changes.observations
+          observations: changes.observations,
+          responsable: changes.responsable
         })
       });
       const data = (await response.json()) as {
         message?: string;
-        order?: Pick<AdminOrder, "id" | "status" | "payment_method" | "admin_notes" | "delivery_address" | "observations">;
+        order?: Pick<AdminOrder, "id" | "status" | "payment_method" | "admin_notes" | "delivery_address" | "observations" | "responsable">;
       };
 
       if (!response.ok) {
@@ -452,7 +461,8 @@ export default function AdminDashboard() {
           payment_method: data.order.payment_method,
           admin_notes: data.order.admin_notes,
           delivery_address: data.order.delivery_address ?? undefined,
-          observations: data.order.observations ?? undefined
+          observations: data.order.observations ?? undefined,
+          responsable: data.order.responsable ?? null
         });
       }
     } catch (error) {
@@ -477,6 +487,7 @@ export default function AdminDashboard() {
         telefono: order.customers?.phone || "",
         direccion_entrega: order.delivery_address,
         estado: order.status,
+        responsable: order.responsable || "",
         metodo_pago: order.payment_method || "",
         notas_admin: order.admin_notes || "",
         postre: item.dessert_name,
@@ -706,6 +717,20 @@ export default function AdminDashboard() {
                   ))}
                 </select>
               </label>
+              <label className="space-y-2">
+                <span className="text-xs font-black uppercase text-cocoa/60">Responsable</span>
+                <select
+                  value={responsableFilter}
+                  onChange={(event) => setResponsableFilter(event.target.value)}
+                  className="motion-input h-11 w-full rounded-md border border-caramel/20 bg-cream px-3 capitalize outline-none ring-caramel/20 transition focus:ring-4"
+                >
+                  <option value="todos">Todos</option>
+                  <option value="sin">Sin asignar</option>
+                  {responsableOptions.map((r) => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+              </label>
             </div>
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -718,6 +743,7 @@ export default function AdminDashboard() {
                 setSearch("");
                 setDateFilter("");
                 setStatusFilter("todos");
+                setResponsableFilter("todos");
               }}
               className="motion-button rounded-full border border-caramel/20 px-4 py-2 text-sm font-black text-cocoa transition hover:bg-cream"
             >
@@ -798,7 +824,7 @@ export default function AdminDashboard() {
               onScroll={syncFromTop}
               className="admin-top-scroll flex-1 overflow-x-auto"
             >
-              <div className="h-px min-w-[1480px]" />
+              <div className="h-px min-w-[1640px]" />
             </div>
             <button
               type="button"
@@ -810,7 +836,7 @@ export default function AdminDashboard() {
             </button>
           </div>
           <div ref={tableScrollRef} onScroll={syncFromTable} className="mt-2 overflow-x-auto">
-            <table className="w-full min-w-[1480px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[1640px] border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-caramel/20 text-cocoa/65">
                   <th className="py-3 pr-4">Fecha</th>
@@ -822,6 +848,7 @@ export default function AdminDashboard() {
                   <th className="py-3 pr-4">Productos</th>
                   <th className="py-3 pr-4">Total</th>
                   <th className="py-3 pr-4">Estado</th>
+                  <th className="py-3 pr-4">Responsable</th>
                   <th className="py-3 pr-4">Pago</th>
                   <th className="py-3 pr-4">Notas</th>
                   <th className="py-3 pr-4">Acciones</th>
@@ -830,7 +857,7 @@ export default function AdminDashboard() {
               <tbody>
                 {filteredOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={12} className="py-6 text-cocoa/60">No hay pedidos para mostrar.</td>
+                    <td colSpan={13} className="py-6 text-cocoa/60">No hay pedidos para mostrar.</td>
                   </tr>
                 ) : (
                   filteredOrders.map((order) => (
@@ -992,6 +1019,29 @@ export default function AdminDashboard() {
                         >
                           {orderStatusOptions.map((status) => (
                             <option key={status} value={status}>{status}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="py-4 pr-4">
+                        <select
+                          value={order.responsable || ""}
+                          disabled={savingOrderId === order.id}
+                          onChange={(event) => {
+                            const nextResponsable = event.target.value || null;
+
+                            updateOrderLocally(order.id, { responsable: nextResponsable });
+                            void saveOrderChanges(order.id, {
+                              status: order.status,
+                              paymentMethod: order.status === "pagado" ? order.payment_method || "efectivo" : null,
+                              adminNotes: order.admin_notes,
+                              responsable: nextResponsable
+                            });
+                          }}
+                          className="motion-input h-10 w-32 rounded-md border border-caramel/20 bg-cream px-3 text-sm font-black capitalize outline-none ring-caramel/20 transition focus:ring-4 disabled:opacity-60"
+                        >
+                          <option value="">Sin asignar</option>
+                          {responsableOptions.map((r) => (
+                            <option key={r} value={r}>{r}</option>
                           ))}
                         </select>
                       </td>
