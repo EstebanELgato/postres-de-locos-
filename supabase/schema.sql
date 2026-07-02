@@ -399,3 +399,12 @@ group by
   orders.status,
   orders.created_at
 order by orders.created_at desc;
+
+drop view if exists public.ventas_mes_actual;
+
+create view public.ventas_mes_actual as
+select *
+from public.ventas
+where created_at >= date_trunc('month', now())
+  and created_at <  date_trunc('month', now()) + interval '1 month'
+order by created_at desc;
