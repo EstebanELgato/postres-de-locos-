@@ -284,7 +284,8 @@ with base as (
     orders.observations,
     orders.status,
     orders.payment_method,
-    orders.admin_notes
+    orders.admin_notes,
+    orders.responsable
   from public.orders
   join public.customers on customers.id = orders.customer_id
 ),
@@ -328,7 +329,8 @@ ultimo_pedido as (
     observations,
     status,
     payment_method,
-    admin_notes
+    admin_notes,
+    responsable
   from base
   order by cedula, created_at desc
 )
@@ -346,6 +348,7 @@ select
   ultimo_pedido.delivery_address as direccion_entrega,
   ultimo_pedido.observations as observaciones,
   ultimo_pedido.admin_notes as notas_admin,
+  ultimo_pedido.responsable,
   ultimo_pedido.status as estado,
   resumen_pedidos.fecha_pedido
 from resumen_items
@@ -375,6 +378,7 @@ select
   orders.delivery_address as direccion_entrega,
   orders.observations as observaciones,
   orders.admin_notes as notas_admin,
+  orders.responsable,
   orders.status as estado,
   orders.created_at as fecha_pedido
 from public.orders
@@ -391,6 +395,7 @@ group by
   orders.delivery_address,
   orders.observations,
   orders.admin_notes,
+  orders.responsable,
   orders.status,
   orders.created_at
 order by orders.created_at desc;
