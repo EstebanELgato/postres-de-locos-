@@ -9,7 +9,7 @@ export const DESSERTS: Dessert[] = [
     description:
       "Capas de arequipe casero que se derriten en la boca sobre una crema suave y sedosa. Dulce, envolvente y perfecto para consentirte.",
     price: DESSERT_PRICE,
-    imageUrl: "/images/publicidad.jpg",
+    imageUrl: "/images/arequipe.jpg",
     active: true
   },
   {
