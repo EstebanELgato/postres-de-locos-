@@ -89,7 +89,7 @@ export default function OrderSuccessModal({ isOpen, onClose }: OrderSuccessModal
             </motion.div>
 
             <div className="relative mt-7">
-              <h2 id="order-success-title" className="text-3xl font-black leading-tight text-cocoa sm:text-4xl">
+              <h2 id="order-success-title" className="font-display text-3xl font-black leading-tight text-cocoa sm:text-4xl">
                 ¡Tu pedido se ha realizado exitosamente!
               </h2>
               <p className="mx-auto mt-4 max-w-md text-base leading-7 text-cocoa/75 sm:text-lg">
@@ -100,7 +100,7 @@ export default function OrderSuccessModal({ isOpen, onClose }: OrderSuccessModal
             <motion.button
               type="button"
               onClick={onClose}
-              className="motion-button relative mt-8 inline-flex w-full items-center justify-center rounded-full bg-berry px-6 py-4 text-base font-black text-white shadow-soft transition hover:bg-caramel sm:w-auto"
+              className="motion-button relative mt-8 inline-flex w-full items-center justify-center rounded-full bg-berry px-8 py-4 text-base font-black text-white shadow-glow transition hover:bg-caramel sm:w-auto"
               whileTap={{ scale: 0.97 }}
             >
               Cerrar
