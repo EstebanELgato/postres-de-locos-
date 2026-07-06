@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import DeliveryNotice from "@/components/DeliveryNotice";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
+import Reveal from "@/components/Reveal";
 import { DESSERTS, formatCurrency } from "@/lib/desserts";
 import type { OrderForm } from "@/lib/types";
 
@@ -64,6 +66,15 @@ export default function Storefront() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [formFeedback, setFormFeedback] = useState<FormFeedback>(null);
+  const [scrolled, setScrolled] = useState(false);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const cartRows = useMemo(
     () =>
@@ -241,6 +252,45 @@ export default function Storefront() {
 
   return (
     <main className="min-h-screen bg-cream text-cocoa">
+      <header
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+          scrolled ? "glass-nav py-2" : "bg-transparent py-3"
+        }`}
+      >
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+          <a
+            href="#"
+            className={`flex min-w-0 items-center gap-3 transition-colors ${scrolled ? "text-cocoa" : "text-white"}`}
+          >
+            <Image
+              src="/images/logo.png"
+              alt="Logo Postres de Locos"
+              width={64}
+              height={64}
+              className="h-11 w-11 shrink-0 rounded-full bg-white object-cover ring-2 ring-white/80 sm:h-12 sm:w-12"
+              priority
+            />
+            <span className="truncate font-display text-base font-black uppercase tracking-tight sm:text-lg">
+              Postres de Locos
+            </span>
+          </a>
+          <nav
+            className={`hidden items-center gap-7 text-sm font-bold lg:flex ${scrolled ? "text-cocoa" : "text-white"}`}
+          >
+            <a href="#productos" className="link-underline transition hover:text-caramel">Productos</a>
+            <a href="#nosotros" className="link-underline transition hover:text-caramel">Quiénes somos</a>
+            <a href="#contacto" className="link-underline transition hover:text-caramel">Contacto</a>
+            <a href="/admin" className="link-underline transition hover:text-caramel">Admin</a>
+          </nav>
+          <a
+            href="#pedido"
+            className="motion-button inline-flex items-center justify-center rounded-full bg-berry px-4 py-2.5 text-xs font-black text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-caramel sm:px-6 sm:text-sm"
+          >
+            Haz tu pedido
+          </a>
+        </div>
+      </header>
+
       <DeliveryNotice />
       <OrderSuccessModal
         isOpen={isSuccessModalOpen}
@@ -251,7 +301,7 @@ export default function Storefront() {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`animate-fade-up rounded-lg border px-4 py-3 text-sm font-bold shadow-soft backdrop-blur ${
+            className={`animate-fade-up flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-bold shadow-lift backdrop-blur ${
               toast.type === "success"
                 ? "border-pistachio/30 bg-white/95 text-pistachio"
                 : toast.type === "error"
@@ -259,6 +309,11 @@ export default function Storefront() {
                   : "border-caramel/30 bg-white/95 text-cocoa"
             }`}
           >
+            <span
+              className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+                toast.type === "success" ? "bg-pistachio" : toast.type === "error" ? "bg-berry" : "bg-caramel"
+              }`}
+            />
             {toast.text}
           </div>
         ))}
@@ -275,76 +330,66 @@ export default function Storefront() {
       </a>
 
       <section
-        className="relative flex min-h-[92vh] flex-col overflow-hidden bg-cover bg-center"
+        className="relative flex min-h-[100svh] flex-col overflow-hidden bg-cover bg-center"
         style={{ backgroundImage: "url('/images/todos-los-sabores.jpg')" }}
       >
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(50,24,8,0.78),rgba(50,24,8,0.48),rgba(255,248,236,0.98))]" />
-        <header className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
-          <a href="#" className="flex min-w-0 items-center gap-3 text-white">
-            <Image
-              src="/images/logo.png"
-              alt="Logo Postres de Locos"
-              width={64}
-              height={64}
-              className="h-12 w-12 shrink-0 rounded-full bg-white object-cover ring-2 ring-white/80 sm:h-14 sm:w-14"
-              priority
-            />
-            <span className="truncate text-base font-black uppercase sm:text-lg">Postres de Locos</span>
-          </a>
-          <nav className="hidden items-center gap-6 text-sm font-semibold text-white lg:flex">
-            <a href="#productos" className="transition hover:text-honey">Productos</a>
-            <a href="#nosotros" className="transition hover:text-honey">Quiénes somos</a>
-            <a href="#contacto" className="transition hover:text-honey">Contacto</a>
-            <a href="/admin" className="transition hover:text-honey">Admin</a>
-          </nav>
-          <div className="flex shrink-0 items-center gap-2">
-            <a
-              href="/admin"
-              className="motion-button inline-flex items-center justify-center rounded-full bg-white/95 px-3 py-3 text-xs font-black text-cocoa shadow-soft transition hover:-translate-y-0.5 hover:bg-honey sm:px-5 sm:text-sm lg:hidden"
-            >
-              Panel admin
-            </a>
-            <a
-              href="#pedido"
-              className="motion-button inline-flex items-center justify-center rounded-full bg-honey px-3 py-3 text-xs font-black text-cocoa shadow-soft transition hover:-translate-y-0.5 hover:bg-white sm:px-6 sm:text-sm"
-            >
-              Haz tu pedido
-            </a>
-          </div>
-        </header>
+        <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_20%_10%,rgba(50,24,8,0.55),transparent),linear-gradient(180deg,rgba(50,24,8,0.82),rgba(50,24,8,0.42),rgba(255,248,236,0.98))]" />
+        <div className="grain-overlay" />
 
-        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-4 pb-20 pt-10 sm:px-6 lg:px-8">
-          <div className="max-w-3xl animate-fade-up text-white">
-            <p className="mb-4 inline-flex rounded-full bg-honey px-4 py-2 text-sm font-black uppercase text-cocoa">
-              Reposteria casera premium
+        {/* Acentos flotantes divertidos */}
+        <div className="pointer-events-none absolute right-[8%] top-[22%] hidden h-24 w-24 rounded-full bg-honey/25 blur-2xl md:block" />
+        <div className="animate-float-orb pointer-events-none absolute right-[16%] top-[30%] hidden text-5xl md:block">🍫</div>
+        <div className="animate-float-orb pointer-events-none absolute right-[30%] top-[62%] hidden text-4xl md:block" style={{ animationDelay: "1.4s" }}>🍰</div>
+
+        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-4 pb-24 pt-32 sm:px-6 lg:px-8">
+          <motion.div
+            className="max-w-3xl text-white"
+            initial={reduceMotion ? false : { opacity: 0, y: 30 }}
+            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-wide text-honey backdrop-blur">
+              <span className="h-2 w-2 rounded-full bg-honey" /> Repostería casera premium
             </p>
-            <h1 className="text-5xl font-black leading-tight sm:text-6xl lg:text-7xl">Postres de Locos</h1>
+            <h1 className="font-display text-5xl font-black leading-[1.02] sm:text-7xl lg:text-8xl">
+              Antojos que <span className="italic text-honey">enamoran</span>
+            </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/90 sm:text-xl">
-              Postres cremosos, frescos y preparados con cuidado para celebrar, regalar o darse un antojo especial.
+              Postres cremosos, frescos y preparados con cuidado para celebrar, regalar o darte ese gusto especial que
+              te mereces.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <a
                 href="#pedido"
-                className="motion-button inline-flex items-center justify-center rounded-full bg-berry px-7 py-4 text-base font-black text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-caramel"
+                className="motion-button inline-flex items-center justify-center rounded-full bg-berry px-8 py-4 text-base font-black text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-caramel"
               >
                 Haz tu pedido
               </a>
               <a
                 href="#productos"
-                className="motion-button inline-flex items-center justify-center rounded-full bg-white px-7 py-4 text-base font-black text-cocoa shadow-soft transition hover:-translate-y-0.5 hover:bg-honey"
+                className="motion-button inline-flex items-center justify-center rounded-full bg-white/95 px-8 py-4 text-base font-black text-cocoa shadow-soft transition hover:-translate-y-0.5 hover:bg-honey"
               >
                 Ver sabores
               </a>
             </div>
-          </div>
+            <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm font-bold text-white/85">
+              <span className="inline-flex items-center gap-2">🧁 100% casero</span>
+              <span className="inline-flex items-center gap-2">🚚 Entrega a domicilio</span>
+              <span className="inline-flex items-center gap-2">💛 Hecho con amor</span>
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      <section id="nosotros" className="bg-cream px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1fr_1.1fr] md:items-center">
+      <section id="nosotros" className="relative bg-cream px-4 py-20 sm:px-6 lg:px-8">
+        <Reveal className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1fr_1.1fr] md:items-center">
           <div>
-            <p className="text-sm font-black uppercase text-berry">Quiénes somos</p>
-            <h2 className="mt-3 text-3xl font-black sm:text-4xl">Postres hechos con responsabilidad</h2>
+            <p className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-wide text-berry">
+              <span className="h-px w-8 bg-berry" /> Quiénes somos
+            </p>
+            <h2 className="mt-4 font-display text-4xl font-black leading-tight sm:text-5xl">
+              Postres hechos con <span className="text-gradient">responsabilidad</span>
+            </h2>
           </div>
           <div className="space-y-5 text-base leading-8 text-cocoa/80 sm:text-lg">
             <p>
@@ -358,35 +403,39 @@ export default function Storefront() {
               del producto y la atención al cliente.
             </p>
           </div>
-        </div>
+        </Reveal>
       </section>
 
-      <section id="productos" className="bg-white px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="max-w-3xl">
-            <p className="text-sm font-black uppercase text-caramel">Descripción de productos</p>
-            <h2 className="mt-3 text-3xl font-black sm:text-4xl">Sabores disponibles</h2>
-            <p className="mt-5 text-base leading-8 text-cocoa/75 sm:text-lg">
-              Nuestros postres están elaborados de forma casera y con mucho amor para quienes buscan un sabor dulce,
-              fresco y casero. Cada opción del catálogo combina buena presentación, porciones generosas y una
-              preparación pensada para disfrutar en cualquier ocasión.
-            </p>
-          </div>
+      <section id="productos" className="relative bg-white px-4 py-20 sm:px-6 lg:px-8">
+        <Reveal className="mx-auto max-w-3xl text-center">
+          <p className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-wide text-caramel">
+            <span className="h-px w-8 bg-caramel" /> Nuestro catálogo <span className="h-px w-8 bg-caramel" />
+          </p>
+          <h2 className="mt-4 font-display text-4xl font-black leading-tight sm:text-5xl">Sabores disponibles</h2>
+          <p className="mt-5 text-base leading-8 text-cocoa/75 sm:text-lg">
+            Elaborados de forma casera y con mucho amor. Cada opción combina buena presentación, porciones generosas y
+            una preparación pensada para disfrutar en cualquier ocasión.
+          </p>
+        </Reveal>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {DESSERTS.map((dessert) => (
-              <article
+        <div className="mx-auto mt-12 grid max-w-7xl gap-7 sm:grid-cols-2 lg:grid-cols-3">
+            {DESSERTS.map((dessert, index) => (
+              <motion.article
                 key={dessert.id}
-                className="motion-card group overflow-hidden rounded-lg border border-caramel/15 bg-cream shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+                className="group flex flex-col overflow-hidden rounded-3xl border border-caramel/12 bg-cream shadow-soft transition-all duration-300 hover:-translate-y-2 hover:shadow-lift"
+                initial={reduceMotion ? false : { opacity: 0, y: 26 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: (index % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }}
               >
-                <div className="relative aspect-[4/3] bg-white">
+                <div className="relative aspect-[4/3] overflow-hidden bg-white">
                   {dessert.imageUrl ? (
                     <Image
                       src={dessert.imageUrl}
                       alt={`Postre de ${dessert.name}`}
                       fill
                       sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                      className="object-cover transition duration-500 group-hover:scale-105"
+                      className="hover-zoom-img object-cover"
                     />
                   ) : (
                     <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-honey/40 via-cream to-caramel/20 text-cocoa/60">
@@ -394,14 +443,15 @@ export default function Storefront() {
                       <span className="text-sm font-black uppercase tracking-wide">Imagen próximamente</span>
                     </div>
                   )}
-                  <span className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1 text-xs font-black text-berry shadow-soft">
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/25 to-transparent" />
+                  <span className="absolute left-4 top-4 rounded-full bg-white/95 px-3.5 py-1.5 text-xs font-black text-berry shadow-soft ring-1 ring-caramel/10">
                     {formatCurrency(dessert.price)}
                   </span>
                 </div>
-                <div className="space-y-4 p-5">
+                <div className="flex flex-1 flex-col space-y-4 p-6">
                   <div>
-                    <h3 className="text-2xl font-black">{dessert.name}</h3>
-                    <p className="mt-2 min-h-20 text-sm leading-6 text-cocoa/70">{dessert.description}</p>
+                    <h3 className="font-display text-2xl font-black">{dessert.name}</h3>
+                    <p className="mt-2 min-h-[4.5rem] text-sm leading-6 text-cocoa/70">{dessert.description}</p>
                   </div>
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-sm font-bold text-cocoa/75">Cantidad</span>
@@ -455,22 +505,29 @@ export default function Storefront() {
                     type="button"
                     onClick={() => addToOrder(dessert.id)}
                     disabled={(selectedQuantities[dessert.id] || 1) > MAX_PER_DESSERT}
-                    className="motion-button w-full rounded-full bg-cocoa px-5 py-3 font-black text-white transition hover:-translate-y-0.5 hover:bg-berry disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+                    className="motion-button mt-auto w-full rounded-full bg-cocoa px-5 py-3.5 font-black text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-berry disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
                   >
                     Agregar al pedido
                   </button>
                 </div>
-              </article>
+              </motion.article>
             ))}
-          </div>
         </div>
       </section>
 
-      <section id="pedido" className="bg-cream px-4 py-16 sm:px-6 lg:px-8">
+      <section id="pedido" className="bg-gradient-to-b from-cream to-sand/60 px-4 py-20 sm:px-6 lg:px-8">
+        <Reveal className="mx-auto mb-10 max-w-3xl text-center">
+          <p className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-wide text-berry">
+            <span className="h-px w-8 bg-berry" /> Haz tu pedido <span className="h-px w-8 bg-berry" />
+          </p>
+          <h2 className="mt-4 font-display text-4xl font-black leading-tight sm:text-5xl">
+            Ya casi es <span className="text-gradient">tuyo</span>
+          </h2>
+        </Reveal>
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.86fr_1.14fr]">
-          <aside className="motion-panel rounded-lg border border-caramel/15 bg-white p-5 shadow-soft sm:p-6">
-            <p className="text-sm font-black uppercase text-berry">Tu pedido</p>
-            <h2 className="mt-3 text-3xl font-black">Resumen</h2>
+          <aside className="rounded-3xl border border-caramel/12 bg-white p-6 shadow-soft lg:sticky lg:top-24 lg:self-start">
+            <p className="text-sm font-black uppercase tracking-wide text-berry">Tu pedido</p>
+            <h2 className="mt-3 font-display text-3xl font-black">Resumen</h2>
             {cartRows.length === 0 ? (
               <p className="mt-5 leading-7 text-cocoa/70">
                 Agrega productos desde el catálogo para verlos aquí antes de enviar el pedido.
@@ -507,10 +564,10 @@ export default function Storefront() {
 
           <form
             onSubmit={submitOrder}
-            className="motion-panel rounded-lg border border-caramel/15 bg-white p-5 shadow-soft sm:p-6"
+            className="relative rounded-3xl border border-caramel/12 bg-white p-6 shadow-soft sm:p-8"
           >
-            <p className="text-sm font-black uppercase text-caramel">Formulario de pedido</p>
-            <h2 className="mt-3 text-3xl font-black">Datos de entrega</h2>
+            <p className="text-sm font-black uppercase tracking-wide text-caramel">Formulario de pedido</p>
+            <h2 className="mt-3 font-display text-3xl font-black">Datos de entrega</h2>
             <input
               type="text"
               tabIndex={-1}
@@ -527,7 +584,7 @@ export default function Storefront() {
                   required
                   value={form.fullName}
                   onChange={(event) => updateForm("fullName", event.target.value)}
-                  className="motion-input h-12 w-full rounded-md border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
+                  className="motion-input h-12 w-full rounded-xl border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
                   placeholder="Tu nombre"
                 />
               </label>
@@ -538,7 +595,7 @@ export default function Storefront() {
                   inputMode="numeric"
                   value={form.documentNumber}
                   onChange={(event) => updateForm("documentNumber", event.target.value)}
-                  className="motion-input h-12 w-full rounded-md border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
+                  className="motion-input h-12 w-full rounded-xl border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
                   placeholder="Tu numero de cedula"
                 />
               </label>
@@ -549,7 +606,7 @@ export default function Storefront() {
                   inputMode="tel"
                   value={form.phone}
                   onChange={(event) => updateForm("phone", event.target.value)}
-                  className="motion-input h-12 w-full rounded-md border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
+                  className="motion-input h-12 w-full rounded-xl border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
                   placeholder="3114591424"
                 />
               </label>
@@ -560,7 +617,7 @@ export default function Storefront() {
                   type="email"
                   value={form.email}
                   onChange={(event) => updateForm("email", event.target.value)}
-                  className="motion-input h-12 w-full rounded-md border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
+                  className="motion-input h-12 w-full rounded-xl border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
                   placeholder="correo@ejemplo.com"
                 />
               </label>
@@ -570,7 +627,7 @@ export default function Storefront() {
                   required
                   value={form.deliveryAddress}
                   onChange={(event) => updateForm("deliveryAddress", event.target.value)}
-                  className="motion-input h-12 w-full rounded-md border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
+                  className="motion-input h-12 w-full rounded-xl border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
                   placeholder="Barrio, calle, casa o referencia"
                 />
               </label>
@@ -579,7 +636,7 @@ export default function Storefront() {
                 <textarea
                   value={form.observations}
                   onChange={(event) => updateForm("observations", event.target.value)}
-                  className="motion-input min-h-28 w-full resize-y rounded-md border border-caramel/20 bg-cream px-4 py-3 outline-none ring-caramel/20 transition focus:ring-4"
+                  className="motion-input min-h-28 w-full resize-y rounded-xl border border-caramel/20 bg-cream px-4 py-3 outline-none ring-caramel/20 transition focus:ring-4"
                   placeholder="Detalles del pedido, hora preferida o indicaciones de entrega"
                 />
               </label>
@@ -588,7 +645,7 @@ export default function Storefront() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="motion-button mt-6 inline-flex w-full items-center justify-center gap-3 rounded-full bg-berry px-6 py-4 text-lg font-black text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-caramel disabled:cursor-not-allowed disabled:opacity-60"
+              className="motion-button mt-7 inline-flex w-full items-center justify-center gap-3 rounded-full bg-berry px-6 py-4 text-lg font-black text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-caramel disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? (
                 <>
@@ -617,43 +674,98 @@ export default function Storefront() {
         </div>
       </section>
 
-      <section id="contacto" className="bg-white px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1fr_0.9fr] md:items-center">
+      <section id="contacto" className="bg-white px-4 py-20 sm:px-6 lg:px-8">
+        <Reveal className="mx-auto grid max-w-7xl items-center gap-8 md:grid-cols-[1fr_0.9fr]">
           <div>
-            <p className="text-sm font-black uppercase text-pistachio">Servicio al cliente</p>
-            <h2 className="mt-3 text-3xl font-black sm:text-4xl">Contáctanos vía WhatsApp</h2>
-            <p className="mt-5 max-w-2xl text-base leading-8 text-cocoa/75 sm:text-lg">
-              Escríbenos para confirmar disponibilidad, resolver dudas o coordinar entregas especiales.
+            <p className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-wide text-pistachio">
+              <span className="h-px w-8 bg-pistachio" /> Servicio al cliente
             </p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <h2 className="mt-4 font-display text-4xl font-black leading-tight sm:text-5xl">
+              Contáctanos vía <span className="text-[#1ebe5d]">WhatsApp</span>
+            </h2>
+            <p className="mt-5 max-w-2xl text-base leading-8 text-cocoa/75 sm:text-lg">
+              Escríbenos para confirmar disponibilidad, resolver dudas o coordinar entregas especiales. Te respondemos
+              rapidito. 💬
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <a
                 href="https://wa.me/573114591424"
                 target="_blank"
                 rel="noreferrer"
-                className="motion-button inline-flex items-center justify-center gap-3 rounded-full bg-pistachio px-7 py-4 text-base font-black text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-cocoa"
+                className="motion-button inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-7 py-4 text-base font-black text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-[#1ebe5d]"
               >
                 <WhatsAppIcon />
                 Hablar por WhatsApp
               </a>
               <a
-                href="/admin"
+                href="#pedido"
                 className="motion-button inline-flex items-center justify-center rounded-full bg-cocoa px-7 py-4 text-base font-black text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-caramel"
               >
-                Entrar al panel admin
+                Hacer un pedido
               </a>
             </div>
           </div>
-          <div className="motion-card overflow-hidden rounded-lg border border-caramel/15 shadow-soft">
+          <div className="group overflow-hidden rounded-3xl border border-caramel/12 shadow-lift">
             <Image
               src="/images/publicidad.jpg"
               alt="Publicidad de Postres de Locos"
               width={900}
               height={1100}
-              className="h-full w-full object-cover"
+              className="hover-zoom-img h-full w-full object-cover"
             />
           </div>
-        </div>
+        </Reveal>
       </section>
+
+      <footer className="relative overflow-hidden bg-cocoa px-4 py-14 text-cream sm:px-6 lg:px-8">
+        <div className="grain-overlay" />
+        <div className="relative mx-auto grid max-w-7xl gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
+          <div>
+            <div className="flex items-center gap-3">
+              <Image
+                src="/images/logo.png"
+                alt="Logo Postres de Locos"
+                width={56}
+                height={56}
+                className="h-12 w-12 rounded-full bg-white object-cover ring-2 ring-honey/40"
+              />
+              <span className="font-display text-xl font-black uppercase">Postres de Locos</span>
+            </div>
+            <p className="mt-4 max-w-sm text-sm leading-7 text-cream/70">
+              Repostería casera premium. Postres frescos y cremosos, hechos con amor para tus momentos especiales.
+            </p>
+          </div>
+          <div>
+            <p className="font-display text-sm font-black uppercase tracking-wide text-honey">Navegación</p>
+            <ul className="mt-4 space-y-2.5 text-sm font-semibold text-cream/80">
+              <li><a href="#productos" className="link-underline transition hover:text-honey">Productos</a></li>
+              <li><a href="#nosotros" className="link-underline transition hover:text-honey">Quiénes somos</a></li>
+              <li><a href="#pedido" className="link-underline transition hover:text-honey">Haz tu pedido</a></li>
+              <li><a href="/admin" className="link-underline transition hover:text-honey">Panel admin</a></li>
+            </ul>
+          </div>
+          <div>
+            <p className="font-display text-sm font-black uppercase tracking-wide text-honey">Contacto</p>
+            <ul className="mt-4 space-y-2.5 text-sm font-semibold text-cream/80">
+              <li>
+                <a
+                  href="https://wa.me/573114591424"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="link-underline inline-flex items-center gap-2 transition hover:text-honey"
+                >
+                  💬 WhatsApp: 311 459 1424
+                </a>
+              </li>
+              <li>🕐 Pedidos con anticipación</li>
+              <li>🚚 Entrega a domicilio</li>
+            </ul>
+          </div>
+        </div>
+        <div className="relative mx-auto mt-10 max-w-7xl border-t border-cream/15 pt-6 text-center text-xs font-semibold text-cream/60">
+          © {new Date().getFullYear()} Postres de Locos · Hecho con 💛 en Colombia
+        </div>
+      </footer>
     </main>
   );
 }

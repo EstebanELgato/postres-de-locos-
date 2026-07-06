@@ -532,9 +532,9 @@ export default function AdminDashboard() {
   if (!isAuthenticated) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-cream px-4 py-12 text-cocoa">
-        <form onSubmit={handleLogin} className="motion-panel w-full max-w-md rounded-lg border border-caramel/15 bg-white p-6 shadow-soft">
-          <p className="text-sm font-black uppercase text-berry">Administrador</p>
-          <h1 className="mt-3 text-3xl font-black">Ingresar al panel</h1>
+        <form onSubmit={handleLogin} className="motion-panel w-full max-w-md rounded-3xl border border-caramel/12 bg-white p-8 shadow-lift">
+          <p className="text-sm font-black uppercase tracking-wide text-berry">Administrador</p>
+          <h1 className="mt-3 font-display text-3xl font-black">Ingresar al panel</h1>
           <p className="mt-3 text-sm leading-6 text-cocoa/65">
             Usa el usuario y la contraseña configurados en las variables de entorno.
           </p>
@@ -580,8 +580,8 @@ export default function AdminDashboard() {
       <div className="mx-auto max-w-7xl">
         <header className="motion-panel flex flex-col gap-4 border-b border-caramel/20 pb-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-black uppercase text-berry">Panel administrativo</p>
-            <h1 className="mt-2 text-3xl font-black sm:text-4xl">Dashboard de ventas</h1>
+            <p className="text-sm font-black uppercase tracking-wide text-berry">Panel administrativo</p>
+            <h1 className="mt-2 font-display text-3xl font-black sm:text-4xl">Dashboard de ventas</h1>
           </div>
           <div className="flex flex-wrap gap-3">
             <button
@@ -604,26 +604,37 @@ export default function AdminDashboard() {
         {message ? <p className="mt-5 rounded-md bg-berry/10 px-4 py-3 text-sm font-bold text-berry">{message}</p> : null}
 
         <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          <div className="motion-card rounded-lg bg-white p-5 shadow-soft">
-            <p className="text-sm font-bold text-cocoa/60">Ventas totales</p>
-            <p className="mt-2 text-2xl font-black sm:text-3xl">{formatCurrency(totals.sold)}</p>
+          <div className="rounded-2xl border border-caramel/12 bg-white p-5 shadow-soft transition hover:-translate-y-1 hover:shadow-lift">
+            <div className="flex items-center gap-2 text-sm font-bold text-cocoa/60">
+              <span className="grid h-8 w-8 place-items-center rounded-xl bg-berry/10 text-base">💰</span> Ventas totales
+            </div>
+            <p className="mt-3 font-display text-2xl font-black sm:text-3xl">{formatCurrency(totals.sold)}</p>
           </div>
-          <div className="motion-card rounded-lg bg-white p-5 shadow-soft">
-            <p className="text-sm font-bold text-cocoa/60">Total vendido hoy</p>
-            <p className="mt-2 text-2xl font-black sm:text-3xl">{formatCurrency(todayStats.sold)}</p>
+          <div className="rounded-2xl border border-caramel/12 bg-white p-5 shadow-soft transition hover:-translate-y-1 hover:shadow-lift">
+            <div className="flex items-center gap-2 text-sm font-bold text-cocoa/60">
+              <span className="grid h-8 w-8 place-items-center rounded-xl bg-caramel/10 text-base">📅</span> Total vendido hoy
+            </div>
+            <p className="mt-3 font-display text-2xl font-black sm:text-3xl">{formatCurrency(todayStats.sold)}</p>
           </div>
-          <div className="motion-card rounded-lg bg-white p-5 shadow-soft">
-            <p className="text-sm font-bold text-cocoa/60">Pedidos del día</p>
-            <p className="mt-2 text-2xl font-black sm:text-3xl">{todayStats.orders}</p>
+          <div className="rounded-2xl border border-caramel/12 bg-white p-5 shadow-soft transition hover:-translate-y-1 hover:shadow-lift">
+            <div className="flex items-center gap-2 text-sm font-bold text-cocoa/60">
+              <span className="grid h-8 w-8 place-items-center rounded-xl bg-honey/20 text-base">🧾</span> Pedidos del día
+            </div>
+            <p className="mt-3 font-display text-2xl font-black sm:text-3xl">{todayStats.orders}</p>
           </div>
-          <div className="motion-card rounded-lg bg-white p-5 shadow-soft">
-            <p className="text-sm font-bold text-cocoa/60">Postres vendidos</p>
-            <p className="mt-2 text-2xl font-black sm:text-3xl">{totals.desserts}</p>
+          <div className="rounded-2xl border border-caramel/12 bg-white p-5 shadow-soft transition hover:-translate-y-1 hover:shadow-lift">
+            <div className="flex items-center gap-2 text-sm font-bold text-cocoa/60">
+              <span className="grid h-8 w-8 place-items-center rounded-xl bg-pistachio/15 text-base">🧁</span> Postres vendidos
+            </div>
+            <p className="mt-3 font-display text-2xl font-black sm:text-3xl">{totals.desserts}</p>
           </div>
-          <div className="motion-card motion-pulse rounded-lg bg-cocoa p-5 text-white shadow-soft sm:col-span-2 xl:col-span-1">
-            <p className="text-sm font-bold text-white/65">Producto más vendido</p>
-            <p className="mt-2 text-2xl font-black">{topProduct?.dessert_name || "Sin ventas"}</p>
-            <p className="mt-1 text-sm text-white/70">{topProduct ? `${topProduct.total_quantity} unidades` : "Aun no hay datos"}</p>
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cocoa to-[#4a2810] p-5 text-white shadow-lift sm:col-span-2 xl:col-span-1">
+            <div className="grain-overlay" />
+            <p className="relative flex items-center gap-2 text-sm font-bold text-white/65">
+              <span className="grid h-8 w-8 place-items-center rounded-xl bg-white/10 text-base">🏆</span> Más vendido
+            </p>
+            <p className="relative mt-3 font-display text-2xl font-black">{topProduct?.dessert_name || "Sin ventas"}</p>
+            <p className="relative mt-1 text-sm text-white/70">{topProduct ? `${topProduct.total_quantity} unidades` : "Aun no hay datos"}</p>
           </div>
         </section>
 
@@ -631,7 +642,7 @@ export default function AdminDashboard() {
           <div className="motion-panel rounded-lg bg-white p-5 shadow-soft">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-2xl font-black">Ventas últimos 7 días</h2>
+                <h2 className="font-display text-2xl font-black">Ventas últimos 7 días</h2>
                 <p className="mt-1 text-sm text-cocoa/60">Gráfica rápida de ingresos registrados.</p>
               </div>
               <p className="text-sm font-black text-berry">{totals.orders} pedidos</p>
@@ -653,7 +664,7 @@ export default function AdminDashboard() {
           </div>
 
           <div className="motion-panel rounded-lg bg-white p-5 shadow-soft">
-            <h2 className="text-2xl font-black">Productos destacados</h2>
+            <h2 className="font-display text-2xl font-black">Productos destacados</h2>
             <p className="mt-1 text-sm text-cocoa/60">Participación por unidades vendidas.</p>
             <div className="mt-6 space-y-4">
               {visibleSummary.slice(0, 5).map((item) => {
@@ -681,7 +692,7 @@ export default function AdminDashboard() {
         <section className="motion-panel mt-8 rounded-lg bg-white p-5 shadow-soft">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h2 className="text-2xl font-black">Buscar y filtrar pedidos</h2>
+              <h2 className="font-display text-2xl font-black">Buscar y filtrar pedidos</h2>
               <p className="mt-1 text-sm text-cocoa/60">Filtra por cliente, teléfono, correo, producto, fecha o estado.</p>
             </div>
             <div className="grid w-full gap-3 sm:grid-cols-3 lg:max-w-3xl">
@@ -764,7 +775,7 @@ export default function AdminDashboard() {
         <section className="motion-panel mt-8 rounded-lg bg-white p-5 shadow-soft">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-2xl font-black">Resumen por postre</h2>
+              <h2 className="font-display text-2xl font-black">Resumen por postre</h2>
               <p className="mt-1 text-sm text-cocoa/60">Conteo total y valor vendido según los filtros activos.</p>
             </div>
             <button
@@ -807,7 +818,7 @@ export default function AdminDashboard() {
         <section className="motion-panel mt-8 rounded-lg bg-white p-5 shadow-soft">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-2xl font-black">Pedidos</h2>
+              <h2 className="font-display text-2xl font-black">Pedidos</h2>
               <p className="mt-1 text-sm text-cocoa/60">Información completa de clientes, entrega y productos.</p>
             </div>
             <button

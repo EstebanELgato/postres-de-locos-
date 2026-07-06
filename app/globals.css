@@ -18,7 +18,19 @@ body {
   margin: 0;
   background: #fff8ec;
   color: #321808;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   animation: page-enter 520ms ease-out both;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+  letter-spacing: -0.015em;
 }
 
 button,
@@ -264,7 +276,77 @@ main > div > section:nth-of-type(4) {
 }
 
 .motion-card:hover {
-  transform: translateY(-6px) scale(1.01);
+  transform: translateY(-8px) scale(1.012);
+  box-shadow: 0 34px 80px rgba(50, 24, 8, 0.22);
+}
+
+/* --- Utilidades premium --- */
+.text-gradient {
+  background: linear-gradient(100deg, #c36b20, #a51d35 55%, #7b3fa0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glass-nav {
+  background: rgba(255, 248, 236, 0.72);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid rgba(195, 107, 32, 0.16);
+  box-shadow: 0 10px 30px rgba(50, 24, 8, 0.08);
+}
+
+.link-underline {
+  position: relative;
+}
+
+.link-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 2px;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: currentColor;
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.link-underline:hover::after {
+  transform: scaleX(1);
+}
+
+.hover-zoom-img {
+  transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.group:hover .hover-zoom-img {
+  transform: scale(1.08);
+}
+
+.grain-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+@keyframes float-orb {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(0, -18px) rotate(6deg);
+  }
+}
+
+.animate-float-orb {
+  animation: float-orb 6s ease-in-out infinite;
 }
 
 .motion-panel {
