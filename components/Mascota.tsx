@@ -103,12 +103,15 @@ export default function Mascota() {
     timers.current.push(hide);
   }, [reduce]);
 
+  const started = useRef(false);
   useEffect(() => {
     if (dismissed) {
       clearTimers();
       setVisible(false);
       return;
     }
+    if (started.current) return; // el bucle arranca una sola vez
+    started.current = true;
     timers.current.push(setTimeout(cycle, 2500));
     return clearTimers;
   }, [cycle, dismissed]);
@@ -156,7 +159,7 @@ export default function Mascota() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-40 select-none overflow-hidden">
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {visible && scene === "peek" ? (
           <motion.div
             key="peek"
