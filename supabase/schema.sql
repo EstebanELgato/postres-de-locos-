@@ -124,37 +124,18 @@ alter table public.orders enable row level security;
 alter table public.order_items enable row level security;
 alter table public.ventas enable row level security;
 
+-- Seguridad: la web NUNCA usa la anon key. Todas las lecturas/escrituras pasan
+-- por rutas API de Next.js con SUPABASE_SERVICE_ROLE_KEY en el servidor.
+-- Por eso NO se crea ninguna politica publica: sin politicas, anon no puede
+-- leer ni escribir nada (RLS activo en todas las tablas).
 drop policy if exists "Public can read active desserts" on public.desserts;
-create policy "Public can read active desserts"
-on public.desserts
-for select
-to anon, authenticated
-using (active = true);
-
 drop policy if exists "Public can insert customers" on public.customers;
-create policy "Public can insert customers"
-on public.customers
-for insert
-to anon, authenticated
-with check (true);
-
 drop policy if exists "Public can insert orders" on public.orders;
-create policy "Public can insert orders"
-on public.orders
-for insert
-to anon, authenticated
-with check (true);
-
 drop policy if exists "Public can insert order items" on public.order_items;
-create policy "Public can insert order items"
-on public.order_items
-for insert
-to anon, authenticated
-with check (true);
 
--- No public read policies are created for customers, orders or order_items.
--- No public read policies are created for ventas.
--- The admin panel reads data only through Next.js API routes that use SUPABASE_SERVICE_ROLE_KEY on the server.
+-- Cinturon extra: revocar privilegios directos de los roles publicos.
+revoke all on all tables in schema public from anon, authenticated;
+alter default privileges in schema public revoke all on tables from anon, authenticated;
 
 insert into public.desserts (name, description, price, image_url, active)
 values
@@ -408,3 +389,10 @@ from public.ventas
 where created_at >= date_trunc('month', now())
   and created_at <  date_trunc('month', now()) + interval '1 month'
 order by created_at desc;
+
+-- Seguridad de vistas: sin security_invoker, las vistas se ejecutan como su
+-- duenio (postgres) y SALTAN el RLS, exponiendo datos de clientes via anon key.
+alter view public.ventas_resumen set (security_invoker = on);
+alter view public.ventas_por_pedido set (security_invoker = on);
+alter view public.ventas_mes_actual set (security_invoker = on);
+revoke all on public.ventas_resumen, public.ventas_por_pedido, public.ventas_mes_actual from anon, authenticated;

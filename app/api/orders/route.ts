@@ -77,8 +77,13 @@ function formatCOP(value: number) {
 }
 
 async function notifyWhatsApp(message: string) {
-  const phone = process.env.ADMIN_WHATSAPP_PHONE ?? "573114591424";
-  const apikey = process.env.CALLMEBOT_APIKEY ?? "8399840";
+  const phone = process.env.ADMIN_WHATSAPP_PHONE;
+  const apikey = process.env.CALLMEBOT_APIKEY;
+
+  if (!phone || !apikey) {
+    console.warn("WhatsApp no configurado: faltan ADMIN_WHATSAPP_PHONE o CALLMEBOT_APIKEY.");
+    return;
+  }
 
   try {
     const cleanPhone = phone.replace(/[^0-9]/g, "");

@@ -9,13 +9,13 @@ type AdminSessionPayload = {
 };
 
 function getAdminSecret() {
-  const password = process.env.ADMIN_PASSWORD;
+  const secret = process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_PASSWORD;
 
-  if (!password) {
+  if (!secret) {
     throw new Error("Falta ADMIN_PASSWORD.");
   }
 
-  return password;
+  return secret;
 }
 
 function sign(value: string) {
