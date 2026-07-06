@@ -709,8 +709,8 @@ export default function Storefront() {
           </div>
           <div className="group overflow-hidden rounded-3xl border border-caramel/12 shadow-lift">
             <Image
-              src="/images/leche-klim.png"
-              alt="Postre Leche Klim de Postres de Locos"
+              src="/images/publicidad.jpg"
+              alt="Postres de Locos"
               width={900}
               height={1100}
               className="hover-zoom-img h-full w-full object-cover"
