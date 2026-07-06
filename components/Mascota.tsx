@@ -205,7 +205,7 @@ export default function Mascota() {
           <motion.div
             key="fly"
             className="absolute flex items-start gap-2"
-            style={{ top: `${8 + seed * 12}%` }}
+            style={{ top: `${15 + seed * 12}%` }}
             initial={{ x: -260, opacity: 1 }}
             animate={{ x: vw + 60 }}
             exit={{ opacity: 0 }}
@@ -227,7 +227,7 @@ export default function Mascota() {
         {visible && scene === "roll" ? (
           <motion.div
             key="roll"
-            className="absolute top-[3%] flex items-start gap-2"
+            className="absolute top-[8%] flex items-start gap-2"
             initial={{ x: -240, opacity: 1 }}
             animate={{ x: vw + 60 }}
             exit={{ opacity: 0 }}
