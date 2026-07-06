@@ -6,6 +6,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import DeliveryNotice from "@/components/DeliveryNotice";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
 import Reveal from "@/components/Reveal";
+import Mascota from "@/components/Mascota";
 import { DESSERTS, formatCurrency } from "@/lib/desserts";
 import type { OrderForm } from "@/lib/types";
 
@@ -292,6 +293,7 @@ export default function Storefront() {
       </header>
 
       <DeliveryNotice />
+      <Mascota />
       <OrderSuccessModal
         isOpen={isSuccessModalOpen}
         onClose={() => setIsSuccessModalOpen(false)}
