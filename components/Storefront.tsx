@@ -338,8 +338,9 @@ export default function Storefront() {
         <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_20%_10%,rgba(50,24,8,0.55),transparent),linear-gradient(180deg,rgba(50,24,8,0.82),rgba(50,24,8,0.42),rgba(255,248,236,0.98))]" />
         <div className="grain-overlay" />
 
-        {/* Acentos flotantes divertidos */}
-        <div className="pointer-events-none absolute right-[8%] top-[22%] hidden h-24 w-24 rounded-full bg-honey/25 blur-2xl md:block" />
+        {/* Acentos líquidos (Liquid Glass) */}
+        <div className="blob blob-iridescent pointer-events-none absolute right-[6%] top-[18%] hidden h-52 w-52 md:block" />
+        <div className="blob pointer-events-none absolute left-[4%] bottom-[24%] hidden h-40 w-40 bg-honey/20 blur-3xl md:block" style={{ animationDelay: "5s" }} />
         <div className="animate-float-orb pointer-events-none absolute right-[16%] top-[30%] hidden text-5xl md:block">🍫</div>
         <div className="animate-float-orb pointer-events-none absolute right-[30%] top-[62%] hidden text-4xl md:block" style={{ animationDelay: "1.4s" }}>🍰</div>
 
@@ -408,7 +409,9 @@ export default function Storefront() {
         </Reveal>
       </section>
 
-      <section id="productos" className="relative bg-white px-4 py-20 sm:px-6 lg:px-8">
+      <section id="productos" className="relative overflow-hidden bg-white px-4 py-20 sm:px-6 lg:px-8">
+        <div className="blob blob-iridescent pointer-events-none absolute -left-24 top-12 hidden h-64 w-64 opacity-60 lg:block" />
+        <div className="blob pointer-events-none absolute -right-20 bottom-16 hidden h-56 w-56 bg-honey/15 blur-3xl lg:block" style={{ animationDelay: "7s" }} />
         <Reveal className="mx-auto max-w-3xl text-center">
           <p className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-wide text-caramel">
             <span className="h-px w-8 bg-caramel" /> Nuestro catálogo <span className="h-px w-8 bg-caramel" />
@@ -517,7 +520,8 @@ export default function Storefront() {
         </div>
       </section>
 
-      <section id="pedido" className="bg-gradient-to-b from-cream to-sand/60 px-4 py-20 sm:px-6 lg:px-8">
+      <section id="pedido" className="relative overflow-hidden bg-gradient-to-b from-cream to-sand/60 px-4 py-20 sm:px-6 lg:px-8">
+        <div className="blob blob-iridescent pointer-events-none absolute -right-28 top-24 hidden h-72 w-72 opacity-50 lg:block" style={{ animationDelay: "3s" }} />
         <Reveal className="mx-auto mb-10 max-w-3xl text-center">
           <p className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-wide text-berry">
             <span className="h-px w-8 bg-berry" /> Haz tu pedido <span className="h-px w-8 bg-berry" />
@@ -527,7 +531,7 @@ export default function Storefront() {
           </h2>
         </Reveal>
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.86fr_1.14fr]">
-          <aside className="rounded-3xl border border-caramel/12 bg-white p-6 shadow-soft lg:sticky lg:top-24 lg:self-start">
+          <aside className="glass-panel rounded-3xl p-6 lg:sticky lg:top-24 lg:self-start">
             <p className="text-sm font-black uppercase tracking-wide text-berry">Tu pedido</p>
             <h2 className="mt-3 font-display text-3xl font-black">Resumen</h2>
             {cartRows.length === 0 ? (
@@ -566,7 +570,7 @@ export default function Storefront() {
 
           <form
             onSubmit={submitOrder}
-            className="relative rounded-3xl border border-caramel/12 bg-white p-6 shadow-soft sm:p-8"
+            className="glass-panel relative rounded-3xl p-6 sm:p-8"
           >
             <p className="text-sm font-black uppercase tracking-wide text-caramel">Formulario de pedido</p>
             <h2 className="mt-3 font-display text-3xl font-black">Datos de entrega</h2>

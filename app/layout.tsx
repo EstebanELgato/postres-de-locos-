@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { Fraunces, Nunito_Sans } from "next/font/google";
+import { Fredoka, Nunito } from "next/font/google";
 import "./globals.css";
 
-const fraunces = Fraunces({
+const fredoka = Fredoka({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
-  weight: ["400", "500", "600", "700", "900"]
+  weight: ["400", "500", "600", "700"]
 });
 
-const nunitoSans = Nunito_Sans({
+const nunito = Nunito({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${fraunces.variable} ${nunitoSans.variable}`}>
+    <html lang="es" className={`${fredoka.variable} ${nunito.variable}`}>
       <body>{children}</body>
     </html>
   );
