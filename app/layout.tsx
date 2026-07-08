@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
-import { Fredoka, Nunito } from "next/font/google";
+import { Fredoka, Nunito, Anton } from "next/font/google";
 import "./globals.css";
+
+const anton = Anton({
+  subsets: ["latin"],
+  variable: "--font-anton",
+  display: "swap",
+  weight: ["400"]
+});
 
 const fredoka = Fredoka({
   subsets: ["latin"],
@@ -27,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${fredoka.variable} ${nunito.variable}`}>
+    <html lang="es" className={`${fredoka.variable} ${nunito.variable} ${anton.variable}`}>
       <body>{children}</body>
     </html>
   );

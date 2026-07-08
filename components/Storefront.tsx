@@ -7,6 +7,7 @@ import DeliveryNotice from "@/components/DeliveryNotice";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
 import Reveal from "@/components/Reveal";
 import Mascota from "@/components/Mascota";
+import HeroCarousel from "@/components/HeroCarousel";
 import { DESSERTS, formatCurrency } from "@/lib/desserts";
 import type { OrderForm } from "@/lib/types";
 
@@ -331,58 +332,7 @@ export default function Storefront() {
         <WhatsAppIcon />
       </a>
 
-      <section
-        className="relative flex min-h-[100svh] flex-col overflow-hidden bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/todos-los-sabores.jpg')" }}
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_20%_10%,rgba(50,24,8,0.55),transparent),linear-gradient(180deg,rgba(50,24,8,0.82),rgba(50,24,8,0.42),rgba(255,248,236,0.98))]" />
-        <div className="grain-overlay" />
-
-        {/* Acentos líquidos (Liquid Glass) */}
-        <div className="blob blob-iridescent pointer-events-none absolute right-[6%] top-[18%] hidden h-52 w-52 md:block" />
-        <div className="blob pointer-events-none absolute left-[4%] bottom-[24%] hidden h-40 w-40 bg-honey/20 blur-3xl md:block" style={{ animationDelay: "5s" }} />
-        <div className="animate-float-orb pointer-events-none absolute right-[16%] top-[30%] hidden text-5xl md:block">🍫</div>
-        <div className="animate-float-orb pointer-events-none absolute right-[30%] top-[62%] hidden text-4xl md:block" style={{ animationDelay: "1.4s" }}>🍰</div>
-
-        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 items-center px-4 pb-24 pt-32 sm:px-6 lg:px-8">
-          <motion.div
-            className="max-w-3xl text-white"
-            initial={reduceMotion ? false : { opacity: 0, y: 30 }}
-            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-wide text-honey backdrop-blur">
-              <span className="h-2 w-2 rounded-full bg-honey" /> Repostería casera premium
-            </p>
-            <h1 className="font-display text-5xl font-black leading-[1.02] sm:text-7xl lg:text-8xl">
-              Antojos que <span className="italic text-honey">enamoran</span>
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-white/90 sm:text-xl">
-              Postres cremosos, frescos y preparados con cuidado para celebrar, regalar o darte ese gusto especial que
-              te mereces.
-            </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <a
-                href="#pedido"
-                className="motion-button inline-flex items-center justify-center rounded-full bg-berry px-8 py-4 text-base font-black text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-caramel"
-              >
-                Haz tu pedido
-              </a>
-              <a
-                href="#productos"
-                className="motion-button inline-flex items-center justify-center rounded-full bg-white/95 px-8 py-4 text-base font-black text-cocoa shadow-soft transition hover:-translate-y-0.5 hover:bg-honey"
-              >
-                Ver sabores
-              </a>
-            </div>
-            <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm font-bold text-white/85">
-              <span className="inline-flex items-center gap-2">🧁 100% casero</span>
-              <span className="inline-flex items-center gap-2">🚚 Entrega a domicilio</span>
-              <span className="inline-flex items-center gap-2">💛 Hecho con amor</span>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      <HeroCarousel />
 
       <section id="nosotros" className="relative bg-cream px-4 py-20 sm:px-6 lg:px-8">
         <Reveal className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1fr_1.1fr] md:items-center">
