@@ -147,7 +147,7 @@ export default function HeroCarousel() {
           className="absolute bottom-6 left-4 rounded-2xl p-4 sm:bottom-16 sm:left-16 sm:p-5"
           style={{
             zIndex: 60,
-            maxWidth: 380,
+            maxWidth: "min(380px, calc(100vw - 2rem))",
             background: "rgba(20,10,4,0.42)",
             backdropFilter: "blur(8px)",
             WebkitBackdropFilter: "blur(8px)",
@@ -161,8 +161,8 @@ export default function HeroCarousel() {
             {SLIDES[activeIndex].name}
           </p>
           <p
-            className="mb-4 hidden text-sm leading-relaxed text-white sm:mb-5 sm:block"
-            style={{ lineHeight: 1.6, textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}
+            className="mb-4 text-xs leading-relaxed text-white sm:mb-5 sm:text-sm"
+            style={{ lineHeight: 1.55, textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}
           >
             Postres caseros, cremosos y hechos con amor. Recién preparados, presentación premium y sabor que enamora. ¡Haz tu pedido ahora!
           </p>
