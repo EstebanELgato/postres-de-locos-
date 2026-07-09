@@ -9,15 +9,16 @@ type Slide = {
   ghost: string;
   bg: string;
   pos: string;
+  fit: "cover" | "contain";
 };
 
 const SLIDES: Slide[] = [
-  { src: "/images/arequipe.jpg", name: "Arequipe", ghost: "AREQUIPE", bg: "#c36b20", pos: "center 30%" },
-  { src: "/images/mora.jpg", name: "Mora", ghost: "MORA", bg: "#7b3fa0", pos: "center 60%" },
-  { src: "/images/maracuya.jpg", name: "Maracuyá", ghost: "MARACUYA", bg: "#ff8a3d", pos: "center 60%" },
-  { src: "/images/oreo.jpg", name: "Oreo", ghost: "OREO", bg: "#3a2a20", pos: "center 60%" },
-  { src: "/images/limon.jpg", name: "Limón", ghost: "LIMON", bg: "#7c9a45", pos: "center 60%" },
-  { src: "/images/leche-klim.png", name: "Leche Klim", ghost: "LECHE KLIM", bg: "#d9a441", pos: "center 58%" }
+  { src: "/images/arequipe.jpg", name: "Arequipe", ghost: "AREQUIPE", bg: "#c36b20", pos: "center", fit: "contain" },
+  { src: "/images/mora.jpg", name: "Mora", ghost: "MORA", bg: "#7b3fa0", pos: "center 60%", fit: "cover" },
+  { src: "/images/maracuya.jpg", name: "Maracuyá", ghost: "MARACUYA", bg: "#ff8a3d", pos: "center 60%", fit: "cover" },
+  { src: "/images/oreo.jpg", name: "Oreo", ghost: "OREO", bg: "#3a2a20", pos: "center 60%", fit: "cover" },
+  { src: "/images/limon.jpg", name: "Limón", ghost: "LIMON", bg: "#7c9a45", pos: "center 60%", fit: "cover" },
+  { src: "/images/leche-klim.png", name: "Leche Klim", ghost: "LECHE KLIM", bg: "#d9a441", pos: "center 58%", fit: "cover" }
 ];
 
 const COUNT = SLIDES.length;
@@ -134,7 +135,7 @@ export default function HeroCarousel() {
                   alt={s.name}
                   draggable={false}
                   className="rounded-[16px]"
-                  style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: s.pos }}
+                  style={{ width: "100%", height: "100%", objectFit: s.fit, objectPosition: s.pos }}
                 />
               </div>
             </div>
