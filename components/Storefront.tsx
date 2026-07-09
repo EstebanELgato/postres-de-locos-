@@ -8,6 +8,7 @@ import OrderSuccessModal from "@/components/OrderSuccessModal";
 import Reveal from "@/components/Reveal";
 import Mascota from "@/components/Mascota";
 import HeroCarousel from "@/components/HeroCarousel";
+import { Lock } from "lucide-react";
 import { DESSERTS, formatCurrency } from "@/lib/desserts";
 import type { OrderForm } from "@/lib/types";
 
@@ -284,12 +285,23 @@ export default function Storefront() {
             <a href="#contacto" className="link-underline transition hover:text-caramel">Contacto</a>
             <a href="/admin" className="link-underline transition hover:text-caramel">Admin</a>
           </nav>
-          <a
-            href="#pedido"
-            className="motion-button inline-flex items-center justify-center rounded-full bg-berry px-4 py-2.5 text-xs font-black text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-caramel sm:px-6 sm:text-sm"
-          >
-            Haz tu pedido
-          </a>
+          <div className="flex items-center gap-2">
+            <a
+              href="/admin"
+              aria-label="Panel de administración"
+              className={`inline-flex h-10 w-10 items-center justify-center rounded-full border transition hover:-translate-y-0.5 lg:hidden ${
+                scrolled ? "border-cocoa/20 text-cocoa hover:bg-cocoa/5" : "border-white/40 text-white hover:bg-white/10"
+              }`}
+            >
+              <Lock size={18} strokeWidth={2.25} />
+            </a>
+            <a
+              href="#pedido"
+              className="motion-button inline-flex items-center justify-center rounded-full bg-berry px-4 py-2.5 text-xs font-black text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-caramel sm:px-6 sm:text-sm"
+            >
+              Haz tu pedido
+            </a>
+          </div>
         </div>
       </header>
 
