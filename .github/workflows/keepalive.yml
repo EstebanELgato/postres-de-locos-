@@ -1,0 +1,23 @@
+name: Keep Supabase Alive
+
+# Llama al endpoint de keep-alive para generar actividad y evitar que
+# Supabase (plan gratis) pause el proyecto tras 7 días de inactividad.
+on:
+  schedule:
+    - cron: "0 8 */3 * *" # cada 3 días a las 08:00 UTC
+  workflow_dispatch: {} # permite ejecutarlo a mano desde la pestaña Actions
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping keep-alive
+        run: |
+          echo "Pinging keep-alive..."
+          code=$(curl -s -o /tmp/body.txt -w "%{http_code}" --max-time 30 https://postres-de-locos.vercel.app/api/keepalive)
+          echo "HTTP $code"
+          cat /tmp/body.txt
+          if [ "$code" != "200" ]; then
+            echo "Keep-alive falló (HTTP $code)"
+            exit 1
+          fi
