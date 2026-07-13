@@ -2,23 +2,27 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { DESSERTS } from "@/lib/desserts";
 
 type Slide = {
   src: string;
   name: string;
   ghost: string;
+  desc: string;
   bg: string;
   pos: string;
   fit: "cover" | "contain";
 };
 
+const descOf = (name: string) => DESSERTS.find((d) => d.name === name)?.description ?? "";
+
 const SLIDES: Slide[] = [
-  { src: "/images/arequipe.jpg", name: "Arequipe", ghost: "AREQUIPE", bg: "#c36b20", pos: "center", fit: "contain" },
-  { src: "/images/mora.jpg", name: "Mora", ghost: "MORA", bg: "#7b3fa0", pos: "center 60%", fit: "cover" },
-  { src: "/images/maracuya.jpg", name: "Maracuyá", ghost: "MARACUYA", bg: "#ff8a3d", pos: "center 60%", fit: "cover" },
-  { src: "/images/oreo.jpg", name: "Oreo", ghost: "OREO", bg: "#3a2a20", pos: "center 60%", fit: "cover" },
-  { src: "/images/limon.jpg", name: "Limón", ghost: "LIMON", bg: "#7c9a45", pos: "center 60%", fit: "cover" },
-  { src: "/images/leche-klim.png", name: "Leche Klim", ghost: "LECHE KLIM", bg: "#d9a441", pos: "center 58%", fit: "cover" }
+  { src: "/images/arequipe.jpg", name: "Arequipe", ghost: "AREQUIPE", desc: descOf("Arequipe"), bg: "#c36b20", pos: "center", fit: "contain" },
+  { src: "/images/mora.jpg", name: "Mora", ghost: "MORA", desc: descOf("Mora"), bg: "#7b3fa0", pos: "center 60%", fit: "cover" },
+  { src: "/images/maracuya.jpg", name: "Maracuyá", ghost: "MARACUYA", desc: descOf("Maracuya"), bg: "#ff8a3d", pos: "center 60%", fit: "cover" },
+  { src: "/images/oreo.jpg", name: "Oreo", ghost: "OREO", desc: descOf("Oreo"), bg: "#3a2a20", pos: "center 60%", fit: "cover" },
+  { src: "/images/limon.jpg", name: "Limón", ghost: "LIMON", desc: descOf("Limon"), bg: "#7c9a45", pos: "center 60%", fit: "cover" },
+  { src: "/images/leche-klim.png", name: "Leche Klim", ghost: "LECHE KLIM", desc: descOf("Leche Klim"), bg: "#d9a441", pos: "center 58%", fit: "cover" }
 ];
 
 const COUNT = SLIDES.length;
@@ -164,7 +168,7 @@ export default function HeroCarousel() {
             className="mb-4 text-xs leading-relaxed text-white sm:mb-5 sm:text-sm"
             style={{ lineHeight: 1.55, textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}
           >
-            Postres caseros, cremosos y hechos con amor. Recién preparados, presentación premium y sabor que enamora. ¡Haz tu pedido ahora!
+            {SLIDES[activeIndex].desc}
           </p>
           <div className="flex gap-3">
             <button
