@@ -61,9 +61,9 @@ export const DESSERTS: Dessert[] = [
     id: 7,
     name: "Chocolate",
     description:
-      "Nuestro nuevo sabor: chocolate intenso, con trozos de delicioso brownie y chocolate premium, cremoso y que se funde en cada cucharada. Profundo, sedoso y adictivo para los verdaderos chocolovers.",
+      "Nuestro nuevo sabor: cremoso y cargado de chocolate. Lleva chips de chocolate, chocolate rayado y trozos de brownie en cada cucharada. Profundo, sedoso y adictivo para los verdaderos chocolovers.",
     price: DESSERT_PRICE,
-    imageUrl: "",
+    imageUrl: "/images/chocolate.jpg",
     active: true
   }
 ];

@@ -22,7 +22,8 @@ const SLIDES: Slide[] = [
   { src: "/images/maracuya.jpg", name: "Maracuyá", ghost: "MARACUYA", desc: descOf("Maracuya"), bg: "#ff8a3d", pos: "center 60%", fit: "cover" },
   { src: "/images/oreo.jpg", name: "Oreo", ghost: "OREO", desc: descOf("Oreo"), bg: "#3a2a20", pos: "center 60%", fit: "cover" },
   { src: "/images/limon.jpg", name: "Limón", ghost: "LIMON", desc: descOf("Limon"), bg: "#7c9a45", pos: "center 60%", fit: "cover" },
-  { src: "/images/leche-klim.png", name: "Leche Klim", ghost: "LECHE KLIM", desc: descOf("Leche Klim"), bg: "#d9a441", pos: "center 58%", fit: "cover" }
+  { src: "/images/leche-klim.png", name: "Leche Klim", ghost: "LECHE KLIM", desc: descOf("Leche Klim"), bg: "#d9a441", pos: "center 58%", fit: "cover" },
+  { src: "/images/chocolate.jpg", name: "Chocolate", ghost: "CHOCOLATE", desc: descOf("Chocolate"), bg: "#4a2c1a", pos: "center 55%", fit: "cover" }
 ];
 
 const COUNT = SLIDES.length;
