@@ -4,7 +4,7 @@ name: Keep Supabase Alive
 # Supabase (plan gratis) pause el proyecto tras 7 días de inactividad.
 on:
   schedule:
-    - cron: "0 8 */3 * *" # cada 3 días a las 08:00 UTC
+    - cron: "0 8 * * *" # todos los días a las 08:00 UTC
   workflow_dispatch: {} # permite ejecutarlo a mano desde la pestaña Actions
 
 jobs:
