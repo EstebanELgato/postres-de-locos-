@@ -59,7 +59,7 @@ export default function HeroCarousel() {
   }, []);
 
   useEffect(() => {
-    const id = window.setInterval(() => navigate("next"), 7000);
+    const id = window.setInterval(() => navigate("next"), 11000);
     return () => window.clearInterval(id);
   }, [navigate]);
 
@@ -193,7 +193,7 @@ export default function HeroCarousel() {
 
         {/* Link abajo-derecha */}
         <a
-          href="#pedido"
+          href="#productos"
           className="absolute bottom-6 right-4 flex items-center uppercase text-white transition-opacity hover:opacity-100 sm:bottom-20 sm:right-10"
           style={{ zIndex: 60, fontFamily: "var(--font-anton), sans-serif", opacity: 0.95, letterSpacing: "-0.02em", lineHeight: 1, textShadow: "0 2px 14px rgba(0,0,0,0.4)" }}
         >

@@ -665,12 +665,6 @@ export default function Storefront() {
                 <WhatsAppIcon />
                 Hablar por WhatsApp
               </a>
-              <a
-                href="#pedido"
-                className="motion-button inline-flex items-center justify-center rounded-full bg-cocoa px-7 py-4 text-base font-black text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-caramel"
-              >
-                Hacer un pedido
-              </a>
             </div>
           </div>
           <div className="group overflow-hidden rounded-3xl border border-caramel/12 shadow-lift">
