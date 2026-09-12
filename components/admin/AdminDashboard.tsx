@@ -638,7 +638,7 @@ export default function AdminDashboard() {
           </div>
         </section>
 
-        <section className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <section className="mt-8">
           <div className="motion-panel rounded-lg bg-white p-5 shadow-soft">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -660,31 +660,6 @@ export default function AdminDashboard() {
                   <span className="truncate text-center text-xs font-bold text-cocoa/55">{day.label}</span>
                 </div>
               ))}
-            </div>
-          </div>
-
-          <div className="motion-panel rounded-lg bg-white p-5 shadow-soft">
-            <h2 className="font-display text-2xl font-black">Productos destacados</h2>
-            <p className="mt-1 text-sm text-cocoa/60">Participación por unidades vendidas.</p>
-            <div className="mt-6 space-y-4">
-              {visibleSummary.slice(0, 5).map((item) => {
-                const max = Math.max(...visibleSummary.map((entry) => entry.total_quantity), 1);
-                return (
-                  <div key={item.dessert_id}>
-                    <div className="flex items-center justify-between gap-3 text-sm">
-                      <span className="font-black">{item.dessert_name}</span>
-                      <span className="font-bold text-cocoa/60">{item.total_quantity}</span>
-                    </div>
-                    <div className="mt-2 h-3 overflow-hidden rounded-full bg-cream">
-                      <div
-                        className="motion-chart-bar h-full rounded-full bg-caramel transition-all"
-                        style={{ width: `${Math.max(6, (item.total_quantity / max) * 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-              {visibleSummary.length === 0 ? <p className="text-sm text-cocoa/60">Aún no hay ventas para graficar.</p> : null}
             </div>
           </div>
         </section>

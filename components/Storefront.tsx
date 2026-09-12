@@ -37,7 +37,6 @@ const initialForm: OrderForm = {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^\+?[0-9\s()\-]{7,20}$/;
-const documentPattern = /^[0-9]{5,12}$/;
 const MAX_PER_DESSERT = 5;
 const WHATSAPP_NUMBER = "573114591424";
 
@@ -154,17 +153,11 @@ export default function Storefront() {
 
     if (
       !form.fullName.trim() ||
-      !form.documentNumber.trim() ||
       !form.phone.trim() ||
       !form.email.trim() ||
       !form.deliveryAddress.trim()
     ) {
-      return "Completa nombre, cedula, telefono, correo y direccion.";
-    }
-
-    const documentDigits = form.documentNumber.replace(/\D/g, "");
-    if (!documentPattern.test(documentDigits)) {
-      return "Escribe una cedula de ciudadania valida.";
+      return "Completa nombre, telefono, correo y direccion.";
     }
 
     if (!emailPattern.test(form.email.trim())) {
@@ -217,7 +210,6 @@ export default function Storefront() {
         body: JSON.stringify({
           customer: {
             fullName: form.fullName,
-            documentNumber: form.documentNumber,
             email: form.email,
             phone: form.phone
           },
@@ -554,17 +546,6 @@ export default function Storefront() {
                   onChange={(event) => updateForm("fullName", event.target.value)}
                   className="motion-input h-12 w-full rounded-xl border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
                   placeholder="Tu nombre"
-                />
-              </label>
-              <label className="space-y-2">
-                <span className="text-sm font-black">Cedula de ciudadania</span>
-                <input
-                  required
-                  inputMode="numeric"
-                  value={form.documentNumber}
-                  onChange={(event) => updateForm("documentNumber", event.target.value)}
-                  className="motion-input h-12 w-full rounded-xl border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
-                  placeholder="Tu numero de cedula"
                 />
               </label>
               <label className="space-y-2">

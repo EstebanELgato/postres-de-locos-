@@ -23,7 +23,6 @@ type OrderRequest = {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^\+?[0-9\s()\-]{7,20}$/;
-const documentPattern = /^[0-9]{5,12}$/;
 const MAX_PER_DESSERT = 5;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 20;
@@ -112,26 +111,21 @@ export async function POST(request: Request) {
     }
 
     const fullName = cleanText(body.customer?.fullName);
-    const documentNumber = cleanText(body.customer?.documentNumber).replace(/\D/g, "");
     const email = cleanText(body.customer?.email).toLowerCase();
     const phone = cleanText(body.customer?.phone);
     const deliveryAddress = cleanText(body.order?.deliveryAddress);
     const observations = cleanText(body.order?.observations);
     const items = Array.isArray(body.items) ? body.items : [];
 
-    if (!fullName || !documentNumber || !email || !phone || !deliveryAddress) {
+    if (!fullName || !email || !phone || !deliveryAddress) {
       return NextResponse.json(
-        { message: "Completa nombre, cedula, correo, telefono y direccion." },
+        { message: "Completa nombre, correo, telefono y direccion." },
         { status: 400 }
       );
     }
 
-    if (!documentPattern.test(documentNumber)) {
-      return NextResponse.json(
-        { message: "Escribe una cedula de ciudadania valida." },
-        { status: 400 }
-      );
-    }
+    // Documento ya no se pide al cliente: se genera uno interno único.
+    const documentNumber = `web-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
     if (!emailPattern.test(email)) {
       return NextResponse.json(
