@@ -35,7 +35,6 @@ const initialForm: OrderForm = {
   website: ""
 };
 
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^\+?[0-9\s()\-]{7,20}$/;
 const MAX_PER_DESSERT = 5;
 const WHATSAPP_NUMBER = "573114591424";
@@ -154,14 +153,9 @@ export default function Storefront() {
     if (
       !form.fullName.trim() ||
       !form.phone.trim() ||
-      !form.email.trim() ||
       !form.deliveryAddress.trim()
     ) {
-      return "Completa nombre, telefono, correo y direccion.";
-    }
-
-    if (!emailPattern.test(form.email.trim())) {
-      return "Escribe un correo electronico valido.";
+      return "Completa nombre, telefono y direccion.";
     }
 
     const phoneDigits = form.phone.replace(/\D/g, "");
@@ -210,7 +204,6 @@ export default function Storefront() {
         body: JSON.stringify({
           customer: {
             fullName: form.fullName,
-            email: form.email,
             phone: form.phone
           },
           order: {
@@ -557,17 +550,6 @@ export default function Storefront() {
                   onChange={(event) => updateForm("phone", event.target.value)}
                   className="motion-input h-12 w-full rounded-xl border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
                   placeholder="3114591424"
-                />
-              </label>
-              <label className="space-y-2 sm:col-span-2">
-                <span className="text-sm font-black">Correo</span>
-                <input
-                  required
-                  type="email"
-                  value={form.email}
-                  onChange={(event) => updateForm("email", event.target.value)}
-                  className="motion-input h-12 w-full rounded-xl border border-caramel/20 bg-cream px-4 outline-none ring-caramel/20 transition focus:ring-4"
-                  placeholder="correo@ejemplo.com"
                 />
               </label>
               <label className="space-y-2 sm:col-span-2">
