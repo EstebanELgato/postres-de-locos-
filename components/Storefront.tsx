@@ -296,7 +296,7 @@ export default function Storefront() {
               <Lock size={18} strokeWidth={2.25} />
             </a>
             <a
-              href="#pedido"
+              href="#productos"
               className="motion-button inline-flex items-center justify-center rounded-full bg-berry px-4 py-2.5 text-xs font-black text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-caramel sm:px-6 sm:text-sm"
             >
               Haz tu pedido
