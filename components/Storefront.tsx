@@ -36,8 +36,6 @@ const initialForm: OrderForm = {
 };
 
 const phonePattern = /^\+?[0-9\s()\-]{7,20}$/;
-const MAX_PER_DESSERT = 5;
-const WHATSAPP_NUMBER = "573114591424";
 
 function getInitialQuantities(): QuantityMap {
   return Object.fromEntries(DESSERTS.map((dessert) => [dessert.id, 1])) as QuantityMap;
@@ -114,10 +112,6 @@ export default function Storefront() {
       return;
     }
 
-    if (amount > MAX_PER_DESSERT) {
-      showToast("error", "Cantidad no disponible. Contáctanos por WhatsApp.");
-      return;
-    }
 
     const dessert = DESSERTS.find((item) => item.id === dessertId);
     setCart((current) => ({
@@ -434,29 +428,9 @@ export default function Storefront() {
                       </button>
                     </div>
                   </div>
-                  {(selectedQuantities[dessert.id] || 1) > MAX_PER_DESSERT ? (
-                    <div className="animate-notice flex items-start gap-3 rounded-xl border border-caramel/30 bg-honey/30 px-3 py-3 text-sm leading-5 text-cocoa shadow-soft">
-                      <span className="animate-notice-icon mt-0.5 text-lg" aria-hidden>
-                        🍰
-                      </span>
-                      <p className="font-semibold">
-                        Por ahora no tenemos esa cantidad de {dessert.name}. Escríbenos al{" "}
-                        <a
-                          href={`https://wa.me/${WHATSAPP_NUMBER}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="font-black text-[#1ebe5d] underline decoration-2 underline-offset-2 transition hover:text-[#16a34a]"
-                        >
-                          WhatsApp
-                        </a>{" "}
-                        y con gusto te damos una solución. 💛
-                      </p>
-                    </div>
-                  ) : null}
                   <button
                     type="button"
                     onClick={() => addToOrder(dessert.id)}
-                    disabled={(selectedQuantities[dessert.id] || 1) > MAX_PER_DESSERT}
                     className="motion-button mt-auto w-full rounded-full bg-cocoa px-5 py-3.5 font-black text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-berry disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
                   >
                     Agregar al pedido
